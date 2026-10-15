@@ -41,6 +41,7 @@ namespace Force {
     VmContext* CreateVmContext() const override; //!< Setup VmContext.
     void CreatePageTableConstraints(std::vector<PageTableConstraint* >& rPageTableConstraints) const override; //!< Setup Page Table constraints.
     VmPaMapper* VmPaMapperInstance(VmAddressSpace* pAddressSpace) const override; //!< Return an RISCV VmPaMapper instance.
+    VmAddressSpace* CreateAddressSpace(VmasControlBlock* pVmasCtlrBlock) const override; //!< Return appropriate VmAddressSpace (VmGpaAddressSpace for HS regime).
     EPrivilegeLevelType GetPrivilegeLevel() const override; //!< Return privilege level of Regime
     void GetRegisterContext(std::vector<std::string>& rRegNames, bool pagingEnabled) const override; //!< Update rRegNames with list of context register names
     void GetDelayedRegisterContext(std::vector<std::string>& rRegNames) const override; //!< Update rRegNames with list of delayed init context register names

@@ -391,7 +391,7 @@ namespace Force {
 
   void GenInstructionAgent::UpdateRegisterFromSimulation(const vector<RegUpdate>& regUpdates, bool hasExceptEvent, uint64& targetPC)
   {
-    for (auto const update : regUpdates) {
+    for (auto const& update : regUpdates) {
       if (update.access_type == "write") {
         if (update.regname == "PC") {
           auto gen_pc = mpGenerator->GetGenPC();
@@ -443,7 +443,7 @@ namespace Force {
   void GenInstructionAgent::UpdateMemoryFromSimulation(const vector<MemUpdate>& memUpdates)
   {
     auto memoryManager = mpGenerator->GetMemoryManager();
-    for (auto const update : memUpdates) {
+    for (auto const& update : memUpdates) {
       // << "{GenInstructionAgent::UpdateMemoryFromSimulation} update bank=" << update.mem_bank << " PA=0x" << hex << update.physical_address << " access_type=" << update.access_type << endl;
       if (update.access_type == "write") {
         auto *data = update.bytes.data();
@@ -699,7 +699,7 @@ namespace Force {
     else {
       // recovering register
       auto reg_file = mpGenerator->GetRegisterFile();
-      for (auto const update : regUpdates) {
+      for (auto const& update : regUpdates) {
         if (update.access_type == "read" || update.regname == "PC")
           continue;
         auto phys_register = reg_file->PhysicalRegisterLookup(update.regname);
@@ -721,7 +721,7 @@ namespace Force {
   void GenInstructionAgent::SaveRegisterBeforeUpdate(const vector<RegUpdate>& regUpdates, BntNode* pBntNode)
   {
     auto reg_file = mpGenerator->GetRegisterFile();
-    for (auto const update : regUpdates) {
+    for (auto const& update : regUpdates) {
       if (update.access_type == "read" || update.regname == "PC")
         continue;
       auto phys_register = reg_file->PhysicalRegisterLookup(update.regname);
@@ -740,7 +740,7 @@ namespace Force {
     auto reg_file = mpGenerator->GetRegisterFile();
     RestoreLoopManagerRepository* restore_loop_manager_repository = RestoreLoopManagerRepository::Instance();
     RestoreLoopManager* restore_loop_manager = restore_loop_manager_repository->GetRestoreLoopManager(mpGenerator->ThreadId());
-    for (auto const update : regUpdates) {
+    for (auto const& update : regUpdates) {
       if (update.access_type == "read" || update.regname == "PC") {
         continue;
       }
@@ -759,7 +759,7 @@ namespace Force {
   void GenInstructionAgent::SaveMemoryBeforeUpdate(const vector<MemUpdate>& memUpdates, BntNode* pBntNode)
   {
     auto memoryManager = mpGenerator->GetMemoryManager();
-    for (auto const update : memUpdates) {
+    for (auto const& update : memUpdates) {
       if (update.access_type == "read")
         continue;
 
@@ -777,7 +777,7 @@ namespace Force {
     VirtualMemoryInitializer* virt_mem_initializer = mpGenerator->GetVirtualMemoryInitializer();
     RestoreLoopManagerRepository* restore_loop_manager_repository = RestoreLoopManagerRepository::Instance();
     RestoreLoopManager* restore_loop_manager = restore_loop_manager_repository->GetRestoreLoopManager(mpGenerator->ThreadId());
-    for (auto const update : memUpdates) {
+    for (auto const& update : memUpdates) {
       if (update.access_type == "read") {
         continue;
       }

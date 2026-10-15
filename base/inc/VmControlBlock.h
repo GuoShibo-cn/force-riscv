@@ -37,7 +37,7 @@ namespace Force {
     const std::string ToString() const override; //!< Return a string describing the VmControlBlock object.
     const char*       Type()     const override { return "VmControlBlock"; }
 
-    VmControlBlock(EPrivilegeLevelType privType, EMemBankType memType); //!< Constructor with priv type and memory bank given.
+    VmControlBlock(EPrivilegeLevelType privType, EMemBankType memType, uint32 stage = 1); //!< Constructor with priv type, memory bank, and translation stage.
     ~VmControlBlock() override; //!< Destructor.
     ASSIGNMENT_OPERATOR_ABSENT(VmControlBlock);
 

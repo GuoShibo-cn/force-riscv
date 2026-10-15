@@ -22,6 +22,8 @@
 #include "Random.h"
 #include "SchedulingStrategy.h"
 
+#include <memory>
+
 using namespace std;
 using namespace Force;
 

@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+ Copyright (C) [2020] Futurewei Technologies, Inc.
+
+ FORCE-RISCV is licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+ THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER
+ EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY OR
+ FIT FOR A PARTICULAR PURPOSE.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+-->
+<page_tables>
+  <paging_mode name="Sv48x4"/>
+
+  <!-- Stage 2 Table PTE (non-leaf) -->
+  <pte type="4K" category="Table" granule="4K" stage="2" class="TablePte">
+    <pte_attribute type="RES0" bits="63-54" value="0" class="ValuePteAttribute"/>
+    <pte_attribute type="Address" bits="53-10" class="AddressPteAttributeRISCV"/>
+    <pte_attribute type="RSW2" bits="9-8" class="RandomPteAttribute"/>
+    <pte_attribute type="DA" bits="7-6" value="0" class="ValuePteAttribute"/>
+    <pte_attribute type="G" bits="5" value="0" class="GPteAttributeRISCV"/> <!-- G bit res0 for stage-2 non-leaf entries -->
+    <pte_attribute type="U" bits="4" value="0" class="ValuePteAttribute"/>
+    <pte_attribute type="X" bits="3" value="0" class="ValuePteAttribute"/>
+    <pte_attribute type="WR" bits="2-1" value="0" class="ValuePteAttribute"/>
+    <pte_attribute type="V" bits="0" class="VPteAttributeRISCV"/>
+  </pte>
+
+  <!-- Stage 2 Leaf PTE - 4K page (level 0) -->
+  <pte type="4K" category="Page" granule="4K" level="0" stage="2">
+    <pte_attribute type="RES0" bits="63-54" value="0" class="ValuePteAttribute"/>
+    <pte_attribute type="Address" bits="53-10" class="AddressPteAttributeRISCV"/>
+    <pte_attribute type="RSW2" bits="9-8" class="RandomPteAttribute"/>
+    <pte_attribute type="DA" bits="7-6" class="DAPteAttributeRISCV"/>
+    <pte_attribute type="G" bits="5" class="GPteAttributeRISCV"/>
+    <pte_attribute type="U" bits="4" class="UPteAttributeRISCV"/>
+    <pte_attribute type="X" bits="3" class="XPteAttributeRISCV"/>
+    <pte_attribute type="WR" bits="2-1" class="WRPteAttributeRISCV"/>
+    <pte_attribute type="V" bits="0" value="1" class="VPteAttributeRISCV"/>
+  </pte>
+
+  <!-- Stage 2 Leaf PTE - 2M superpage (level 1) -->
+  <pte type="2M" category="Page" granule="4K" level="1" stage="2">
+    <pte_attribute type="RES0" bits="63-54" value="0" class="ValuePteAttribute"/>
+    <pte_attribute type="Address" bits="53-10" class="AddressPteAttributeRISCV"/>
+    <pte_attribute type="RSW2" bits="9-8" class="RandomPteAttribute"/>
+    <pte_attribute type="DA" bits="7-6" class="DAPteAttributeRISCV"/>
+    <pte_attribute type="G" bits="5" class="GPteAttributeRISCV"/>
+    <pte_attribute type="U" bits="4" class="UPteAttributeRISCV"/>
+    <pte_attribute type="X" bits="3" class="XPteAttributeRISCV"/>
+    <pte_attribute type="WR" bits="2-1" class="WRPteAttributeRISCV"/>
+    <pte_attribute type="V" bits="0" value="1" class="VPteAttributeRISCV"/>
+  </pte>
+
+  <!-- Stage 2 Leaf PTE - 1G superpage (level 2) -->
+  <pte type="1G" category="Page" granule="4K" level="2" stage="2">
+    <pte_attribute type="RES0" bits="63-54" value="0" class="ValuePteAttribute"/>
+    <pte_attribute type="Address" bits="53-10" class="AddressPteAttributeRISCV"/>
+    <pte_attribute type="RSW2" bits="9-8" class="RandomPteAttribute"/>
+    <pte_attribute type="DA" bits="7-6" class="DAPteAttributeRISCV"/>
+    <pte_attribute type="G" bits="5" class="GPteAttributeRISCV"/>
+    <pte_attribute type="U" bits="4" class="UPteAttributeRISCV"/>
+    <pte_attribute type="X" bits="3" class="XPteAttributeRISCV"/>
+    <pte_attribute type="WR" bits="2-1" class="WRPteAttributeRISCV"/>
+    <pte_attribute type="V" bits="0" value="1" class="VPteAttributeRISCV"/>
+  </pte>
+
+  <!-- Stage 2 Leaf PTE - 512G superpage (level 3) -->
+  <pte type="512G" category="Page" granule="4K" level="3" stage="2">
+    <pte_attribute type="RES0" bits="63-54" value="0" class="ValuePteAttribute"/>
+    <pte_attribute type="Address" bits="53-10" class="AddressPteAttributeRISCV"/>
+    <pte_attribute type="RSW2" bits="9-8" class="RandomPteAttribute"/>
+    <pte_attribute type="DA" bits="7-6" class="DAPteAttributeRISCV"/>
+    <pte_attribute type="G" bits="5" class="GPteAttributeRISCV"/>
+    <pte_attribute type="U" bits="4" class="UPteAttributeRISCV"/>
+    <pte_attribute type="X" bits="3" class="XPteAttributeRISCV"/>
+    <pte_attribute type="WR" bits="2-1" class="WRPteAttributeRISCV"/>
+    <pte_attribute type="V" bits="0" value="1" class="VPteAttributeRISCV"/>
+  </pte>
+</page_tables>

@@ -28,10 +28,9 @@ using namespace std;
 
 namespace Force {
 
-  VmDirectMapControlBlockRISCV::VmDirectMapControlBlockRISCV(EPrivilegeLevelType elType, EMemBankType memType)
-   : VmDirectMapControlBlock(elType, memType)
+  VmDirectMapControlBlockRISCV::VmDirectMapControlBlockRISCV(EPrivilegeLevelType privType, EMemBankType memType, uint32 stage)
+   : VmDirectMapControlBlock(privType, memType, stage)
   {
-
   }
 
   void VmDirectMapControlBlockRISCV::Setup(Generator* pGen)

@@ -83,8 +83,9 @@ class FpixExecutor(IssExecutor):
 
             my_elf = self.locate_test_case("*.Default.ELF", my_task_name)
 
-            my_log = self.sim_log
-            my_elog = self.sim_log
+            # The simulator owns fpix_sim.log; redirecting stdout there corrupts the trace.
+            my_log = "fpix_console.log"
+            my_elog = "fpix_console.log"
 
             if "cfg" not in self.ctrl_item.fpix_riscv.keys():
                 Msg.err("Fpix_ISS did not properly execute, Reason: Fpix config was not specified")
@@ -127,7 +128,7 @@ class FpixExecutor(IssExecutor):
                 my_cmd, my_log, my_elog, self.ctrl_item.timeout, True
             )
 
-            my_extract_results = self.extract_results(my_result, my_log, my_elog)
+            my_extract_results = self.extract_results(my_result, self.sim_log, my_elog)
 
             # report the results
             Msg.info("ISSResult = " + str(my_extract_results))

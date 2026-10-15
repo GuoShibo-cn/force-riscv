@@ -18,6 +18,7 @@
 
 #pragma GCC visibility push(default)
 
+#include <cstdint>
 #include <fstream>
 #include <map>
 #include <string>

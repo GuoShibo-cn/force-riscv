@@ -121,6 +121,7 @@
     <choice description="HRW; Hypervisor guest external interrupt-enable register." name="hgeie" value="0x607" weight="0"/>
     <choice description="HRW; Hypervisor bad guest physical address." name="htval" value="0x643" weight="0"/>
     <choice description="HRW; Hypervisor interrupt pending." name="hip" value="0x644" weight="0"/>
+    <choice description="HRW; Hypervisor virtual interrupt pending." name="hvip" value="0x645" weight="0"/>
     <choice description="HRW; Hypervisor trap instruction (transformed)." name="htinst" value="0x64a" weight="0"/>
     <choice description="HRW; Hypervisor guest address translation and protection." name="hgatp" value="0x680" weight="0"/>
     <choice description="DRW; Debug control and status register." name="dcsr" value="0x7b0" weight="0"/>
@@ -193,7 +194,7 @@
     <choice description="URW; Vector length." name="vl" value="0xc20" weight="0"/>
     <choice description="URW; Vector data type register." name="vtype" value="0xc21" weight="0"/>
     <choice description="URO; VLEN/8 (vector register length in bytes)." name="vlenb" value="0xc22" weight="0"/>
-    <choice description="HRO; Hypervisor guest external interrupt pending." name="hgeip" value="0xe07" weight="0"/>
+    <choice description="HRO; Hypervisor guest external interrupt pending." name="hgeip" value="0xe12" weight="0"/>
     <choice description="MRO; Vendor ID." name="mvendorid" value="0xf11" weight="0"/>
     <choice description="MRO; Architecture ID." name="marchid" value="0xf12" weight="0"/>
     <choice description="MRO; Implementation ID." name="mimpid" value="0xf13" weight="0"/>

@@ -43,7 +43,7 @@ using namespace std;
 namespace Force {
 
   SwitchPrivilegeSolver::SwitchPrivilegeSolver(Generator* pGenerator)
-    : mpGenerator(pGenerator), mResult(), mTargetAddrSpecified(false), mSkipAddrValidation(false), mAddrChoicesModId(0), mCurrentPrivLevel(MAX_UINT32), mCurrentState(), mTargetState(), mVmReloadRegisters(), mStateRegFieldNames({"UIE", "SIE", "MIE", "SUM", "MXR", "MPRV"})
+    : mpGenerator(pGenerator), mResult(), mTargetAddrSpecified(false), mSkipAddrValidation(false), mAddrChoicesModId(0), mCurrentPrivLevel(MAX_UINT32), mCurrentState(), mTargetState(), mVmReloadRegisters(), mStateRegFieldNames({"UIE", "SIE", "MIE", "SUM", "MXR", "MPRV", "V"})
   {
   }
 
@@ -139,6 +139,7 @@ namespace Force {
     mTargetState["SUM"] = ComputeTargetStateValue(mCurrentState["SUM"], mTargetState["SUM"], "Privilege Switch - SUM Bit");
     mTargetState["MXR"] = ComputeTargetStateValue(mCurrentState["MXR"], mTargetState["MXR"], "Privilege Switch - MXR Bit");
     mTargetState["MPRV"] = ComputeTargetStateValue(mCurrentState["MPRV"], mTargetState["MPRV"], "Privilege Switch - MPRV Bit");
+    mTargetState["V"] = ComputeTargetStateValue(mCurrentState["V"], mTargetState["V"], "Privilege Switch - MPRV Bit");  // reuse MPRV choices for V bit
   }
 
   bool SwitchPrivilegeSolver::ValidateAndGenerateSwitchScheme()
@@ -211,6 +212,11 @@ namespace Force {
       status_reg_name = "sstatus";
       status_field_names.push_back("SPP");
       break;
+    case 2:
+      status_reg_name = "hstatus";
+      status_field_names.push_back("SPVP");  // hstatus.SPVP for HS-mode (previous privilege)
+      status_field_names.push_back("SPV");   // hstatus.SPV for VS-mode (previous V bit)
+      break;
     case 3:
       status_reg_name = "mstatus";
       status_field_names.push_back("MPP");
@@ -235,6 +241,9 @@ namespace Force {
       }
 
       break;
+    case 2:
+      status_field_names.push_back("MPIE");  // HS-mode trap uses MPIE via mstatus
+      break;
     case 3:
       status_field_names.push_back("MPIE");
       status_field_names.push_back("MPRV");
@@ -253,8 +262,16 @@ namespace Force {
     for (const string& status_field_name : status_field_names) {
       uint64 status_field_val = 0;
 
-      if ((status_field_name == "SPP") or (status_field_name == "MPP")) {
+      if (status_field_name == "SPP" || status_field_name == "MPP") {
         status_field_val = mResult.mTargetPrivLevel;
+      }
+      else if (status_field_name == "SPVP") {
+        // hstatus.SPVP records the privilege level we are returning to
+        status_field_val = mResult.mTargetPrivLevel;
+      }
+      else if (status_field_name == "SPV") {
+        // hstatus.SPV records the V-bit of the context we are returning to
+        status_field_val = mTargetState["V"];
       }
       else if (status_field_name.substr(1) == "PIE") {
         status_field_val = mTargetState[status_field_name.substr(0, 1) + "IE"];
@@ -337,7 +354,14 @@ namespace Force {
 
     mCurrentState.clear();
     for (const string& reg_field_name : mStateRegFieldNames) {
-      mCurrentState[reg_field_name] = GetRegisterFieldValue("mstatus", reg_field_name);
+      if (reg_field_name == "V") {
+        // Read V (virtualization) bit from Internal "virtual" register
+        uint64 v_val = 0;
+        mpGenerator->ReadRegister("virtual", "MODE", v_val);
+        mCurrentState["V"] = static_cast<uint32>(v_val & 0x1);
+      } else {
+        mCurrentState[reg_field_name] = GetRegisterFieldValue("mstatus", reg_field_name);
+      }
     }
   }
 

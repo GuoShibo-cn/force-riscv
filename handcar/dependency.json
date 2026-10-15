@@ -1,0 +1,29 @@
+{
+  "schema": 1,
+  "name": "handcar-standalone-v2-local",
+  "source_dir": "handcar/standalone-v2",
+  "upstream": {
+    "status": "unknown",
+    "remote": null,
+    "revision": null,
+    "reason": "The local standalone-v2 tree is not a Git repository and no submodule remote was supplied."
+  },
+  "recipe": "standalone-v2-gnu20-v1",
+  "manager": "handcar/tools/manage.py",
+  "abi_headers": {
+    "headers/handcar_cosim_wrapper.h": "handcar/headers/handcar_cosim_wrapper.h",
+    "force-abi/handcar_cosim_wrapper.h": "utils/handcar/handcar_cosim_wrapper.h"
+  },
+  "host_callbacks": ["update_generator_memory", "update_generator_register"],
+  "acceptance": {
+    "runner": "utils/regression/run_hypervisor_m1.py",
+    "schema": 1,
+    "profile": "m1",
+    "cases": 106
+  },
+  "notes": [
+    "Snapshots freeze effective local inputs, including pre-generated build/*.cc and build/insn_list.h; they do not replace source regeneration.",
+    "The manager does not invoke build_v2.sh, copy compiler caches, or install by default.",
+    "SHA256 binds evidence, not the identity of its author; manifests are not cryptographic signatures."
+  ]
+}

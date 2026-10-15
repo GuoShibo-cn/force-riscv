@@ -23,7 +23,7 @@ CLEAN_TARGETS = \
 
 include Makefile.common
 
-INC_PATHS = -I. -I../../3rd_party/inc/ -I./fesvr -I./force_mod -I./riscv -I./softfloat -I./spike_main
+INC_PATHS = -I. -I../3rd_party/inc/ -I./fesvr -I./force_mod -I./riscv -I./softfloat -I./spike_main
 
 NODEPS:=clean
 
@@ -64,7 +64,7 @@ handcar:
 
 .PHONY: install
 install: ./bin/handcar_cosim.so
-	@cp bin/handcar_cosim.so ../../utils/handcar
+	@cp bin/handcar_cosim.so ../utils/handcar
 
 .PHONY: clean
 clean:

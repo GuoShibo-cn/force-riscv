@@ -66,6 +66,11 @@ namespace Force {
         root_table.Setup(9, 38, 30, "", 3, 2);
         break;
       case EPagingMode::Sv48:
+        root_table.Setup(9, 47, 39, "", 3, 3);
+        break;
+      case EPagingMode::Sv57:
+        root_table.Setup(9, 56, 48, "", 3, 4);
+        break;
       default:
         root_table.Setup(9, 47, 39, "", 3, 3);
     }

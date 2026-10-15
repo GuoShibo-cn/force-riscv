@@ -24,6 +24,7 @@
 #include "Register.h"
 #include "UtilityFunctions.h"
 #include "VmManager.h"
+#include "VmManagerRISCV.h"
 #include "VmMapper.h"
 
 using namespace std;
@@ -44,6 +45,11 @@ namespace Force {
     Generator::Setup(threadId);
 
     mpPrivilegeField = mpRegisterFile->RegisterLookup("privilege")->RegisterFieldLookup("MODE");
+
+    // Wire up two-stage address translation for RISC-V H-extension
+    // Called lazily via updateVm when VS/HS regimes become active
+    // auto vm_mgr_riscv = dynamic_cast<VmManagerRISCV*>(GetVmManager());
+    // if (vm_mgr_riscv) { vm_mgr_riscv->SetupTwoStageRISCV(); }
 
     //RestoreLoopManagerRepository* restore_loop_manager_repository = RestoreLoopManagerRepository::Instance();
     //restore_loop_manager_repository->AddRestoreLoopManager(threadId, new RestoreLoopManagerRISCV(this));

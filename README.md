@@ -36,6 +36,17 @@ To run the output of FORCE-RISCV with the CORE-V-VERIF UVM testbench and to run 
 
 # FORCE-RISCV Quick Start Guide for RISC-V
 
+## Hypervisor / Handcar Development
+
+For the isolated, pinned-upstream Handcar workflow, start with
+[Hypervisor Quickstart](docs/HYPERVISOR_QUICKSTART.md), then the
+[workflow guide](docs/HYPERVISOR_WORKFLOW_GUIDE.md) and
+[dependency guide](docs/HANDCAR_DEPENDENCY_GUIDE.md).
+The [migration status](docs/HANDCAR_UPSTREAM_REBASE_STATUS.md) records tested
+library hashes and scope limitations. Candidate libraries are not installed
+automatically. Do not run root `make tests` during this workflow: it deletes
+`output/`, including isolated builds and acceptance evidence.
+
 ## User Manual
 The user manual is located in the 'force-riscv/doc' directory.  The user manual is still a "work in progress".
 

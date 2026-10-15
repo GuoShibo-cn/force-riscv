@@ -26,8 +26,8 @@ def shuffle_list(aList):
     # The random module is used here to provide the shuffling algorithm using
     # the back end RandomUtils module to handle the random number generation.
     # The random module itself should not be used for random number generation!
-    import random
-
     list_copy = list(aList)
-    random.shuffle(list_copy, lambda: RandomUtils.randomReal(0.0, 1.0))
+    for i in range(len(list_copy) - 1, 0, -1):
+        swap_index = RandomUtils.random32(0, i)
+        list_copy[i], list_copy[swap_index] = list_copy[swap_index], list_copy[i]
     return list_copy

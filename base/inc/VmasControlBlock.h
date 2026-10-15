@@ -47,7 +47,7 @@ namespace Force {
     const char*       Type()     const override { return "VmasControlBlock"; }
 
     ASSIGNMENT_OPERATOR_ABSENT(VmasControlBlock);
-    VmasControlBlock(EPrivilegeLevelType privType, EMemBankType memType); //!< Constructor with privilege type and memory bank given.
+    VmasControlBlock(EPrivilegeLevelType privType, EMemBankType memType, uint32 stage = 1); //!< Constructor with privilege type, memory bank, and translation stage.
     ~VmasControlBlock() override; //!< Destructor.
 
     void Setup(Generator* pGen) override; //!< Setup the VmasControlBlock object.

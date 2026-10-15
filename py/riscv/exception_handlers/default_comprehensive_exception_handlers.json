@@ -97,7 +97,7 @@
     }
   },
   {
-    "ExceptionCode": "ExceptionClassRISCV.UNUSED_10",
+    "ExceptionCode": "ExceptionClassRISCV.ENV_CALL_FROM_VU",
     "ExceptionHandler":
     {
       "ExceptionHandlerModule": "riscv.exception_handlers.SkipInstructionHandler",
@@ -129,19 +129,43 @@
     }
   },
   {
-    "ExceptionCode": "ExceptionClassRISCV.UNUSED_14",
-    "ExceptionHandler":
-    {
-      "ExceptionHandlerModule": "riscv.exception_handlers.SkipInstructionHandler",
-      "ExceptionHandlerClass": "SkipInstructionHandlerRISCV"
-    }
-  },
-  {
     "ExceptionCode": "ExceptionClassRISCV.STORE_AMO_PAGE_FAULT",
     "ExceptionHandler":
     {
       "ExceptionHandlerModule": "riscv.exception_handlers.PageFaultExceptionHandler",
       "ExceptionHandlerClass": "PageFaultExceptionHandlerRISCV"
+    }
+  },
+  {
+    "ExceptionCode": "ExceptionClassRISCV.INSTRUCTION_GUEST_PAGE_FAULT",
+    "ExceptionHandler":
+    {
+      "ExceptionHandlerModule": "riscv.exception_handlers.PageFaultExceptionHandler",
+      "ExceptionHandlerClass": "PageFaultExceptionHandlerRISCV"
+    }
+  },
+  {
+    "ExceptionCode": "ExceptionClassRISCV.LOAD_GUEST_PAGE_FAULT",
+    "ExceptionHandler":
+    {
+      "ExceptionHandlerModule": "riscv.exception_handlers.PageFaultExceptionHandler",
+      "ExceptionHandlerClass": "PageFaultExceptionHandlerRISCV"
+    }
+  },
+  {
+    "ExceptionCode": "ExceptionClassRISCV.STORE_AMO_GUEST_PAGE_FAULT",
+    "ExceptionHandler":
+    {
+      "ExceptionHandlerModule": "riscv.exception_handlers.PageFaultExceptionHandler",
+      "ExceptionHandlerClass": "PageFaultExceptionHandlerRISCV"
+    }
+  },
+  {
+    "ExceptionCode": "ExceptionClassRISCV.VIRTUAL_INSTRUCTION",
+    "ExceptionHandler":
+    {
+      "ExceptionHandlerModule": "riscv.exception_handlers.SkipInstructionHandler",
+      "ExceptionHandlerClass": "SkipInstructionHandlerRISCV"
     }
   }
 ]

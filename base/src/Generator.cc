@@ -1022,7 +1022,7 @@ namespace Force {
     ReserveRegister(inter_reg_name, reserv_acc); // reserve the GPR to avoid being corrupted by others.
     mPostAmbleRequests.push_back(new GenRegisterReservation(inter_reg_name, false, reserv_acc)); // restore the register reservation.
 
-    for (const auto item : rRegisters) {
+    for (const auto& item : rRegisters) {
       const string& name = item.first;
       uint64 value = item.second;
       LOG(info) << "{Generator::AddLoadSysRegisterAmbleRequests} register " << name << " value: " << hex << value << endl;

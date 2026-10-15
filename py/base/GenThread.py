@@ -701,3 +701,7 @@ class GenThread(object):
 
     def synchronizeWithBarrier(self, kwargs):
         return self.interface.synchronizeWithBarrier(self.genThreadID, kwargs)
+
+    def writePhysicalMemory(self, address, data, mem_bank=0):
+        import VirtualMemory
+        VirtualMemory.writePhysicalMemory(mem_bank, address, bytes(data))

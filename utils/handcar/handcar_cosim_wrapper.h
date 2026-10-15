@@ -258,8 +258,8 @@ bool inject_simulator_events(uint32_t cpuid, uint32_t events){return false;} //!
 //   0 - success
 //   1 - some pointer arguments were null
 //   2 - invalid procid
-//   3 - PMP problem with PA after address translation somehow
-//   4 - access exception while trying to check pmp status of page table entry PA
+//   3 - access/PMP problem during translation
+//   4 - reserved legacy code for page-table-entry PA access exception; current native wrapper does not distinguish it from code 3
 //   5 - walk was unsuccessful and access type was FETCH
 //   6 - walk was unsuccessful and access type was LOAD
 //   7 - walk was unsuccessful and access type was STORE

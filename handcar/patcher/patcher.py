@@ -32,7 +32,7 @@ import pathlib
 import shutil
 import subprocess
 
-from docopt.docopt import docopt
+from docopt import docopt
 
 copyright_text = """#
 # Copyright (C) [2020] Futurewei Technologies, Inc.

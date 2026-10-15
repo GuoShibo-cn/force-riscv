@@ -17,11 +17,13 @@
 
 #include <fstream>
 #include <memory>
+#include <stdexcept>
 
 #include "Generator.h"
 #include "Log.h"
 #include "MemoryManager.h"
 #include "MemoryTraits.h"
+#include "TwoStageVmMapper.h"
 #include "VmContextParameter.h"
 #include "VmFactory.h"
 #include "VmInfo.h"
@@ -63,8 +65,10 @@ namespace Force {
 
 
   VmManager::VmManager(const VmManager& rOther)
-    : Object(rOther), mpCurrentRegime(nullptr), mpCurrentMapper(nullptr), mpGenerator(nullptr), mpVmInfo(nullptr), mVmRegimes(), mVmContextInfoCache(), mVmFactories()
+    : Object(rOther), mpCurrentRegime(nullptr), mpCurrentMapper(nullptr), mpGenerator(nullptr), mpVmInfo(nullptr), mVmRegimes(), mVmContextInfoCache(), mpTwoStageMapper(nullptr), mpPtgDataMapper(nullptr), mPtgBindingRequired(false), mVmFactories()
   {
+    if (rOther.mPtgBindingRequired)
+      throw std::runtime_error("cloning an active PTG address scope is unsupported");
     for (auto const mapper_ptr : rOther.mVmRegimes) {
       if (nullptr != mapper_ptr) {
         mVmRegimes.push_back(dynamic_cast<VmRegime* >(mapper_ptr->Clone()));
@@ -91,6 +95,9 @@ namespace Force {
     for (auto factory_iter : mVmFactories) {
       delete (factory_iter.second);
     }
+
+    delete mpTwoStageMapper;
+    mpTwoStageMapper = nullptr;
   }
 
   VmRegime* VmManager::GetVmRegime(EVmRegimeType regimeType) const
@@ -148,6 +155,8 @@ namespace Force {
 
   void VmManager::Update()
   {
+    if (mPtgBindingRequired)
+      throw std::runtime_error("native VM update is blocked by the PTG address scope");
     mpVmInfo->Clear();
     mpVmInfo->GetCurrentStates(*mpGenerator);
     EVmRegimeType curr_regime_type = mpVmInfo->RegimeType();
@@ -251,6 +260,8 @@ namespace Force {
   // generate a new VmMapper based on users rawContextParams input
   uint32 VmManager::GenContextIdRequest(EVmRegimeType regimeType, const std::map<std::string, uint64> & rRawContextParams)
   {
+    if (mPtgBindingRequired)
+      throw std::runtime_error("native context creation is blocked by the PTG address scope");
     //1. use factory to create tmpVmContextParameters based on regime
     //2. compare and find if VmcontextParams exist
     //3. if not exist, create new address space, add to cache, delete tmpVmContextParameters and return id
@@ -331,6 +342,42 @@ namespace Force {
   uint32 VmManager::GetVmCurrentContext() const
   {
     return CurrentVmMapper()->GenContextId();
+  }
+
+  bool VmManager::IsTwoStageEnabled() const
+  {
+    auto hs_regime = mVmRegimes.at(EVmRegimeTypeBaseType(EVmRegimeType::HS));
+    auto vs_regime = mVmRegimes.at(EVmRegimeTypeBaseType(EVmRegimeType::VS));
+    if (!hs_regime || !vs_regime) {
+      return false;
+    }
+    auto hs_mapper = hs_regime->CurrentVmMapper();
+    auto vs_mapper = vs_regime->CurrentVmMapper();
+    return (hs_mapper && vs_mapper && hs_mapper->IsActive() && vs_mapper->IsActive());
+  }
+
+  TwoStageVmMapper* VmManager::GetTwoStageMapper() const
+  {
+    return mpTwoStageMapper;
+  }
+
+  void VmManager::SetupTwoStageTranslation()
+  {
+    if (!IsTwoStageEnabled()) {
+      return;
+    }
+
+    auto vs_regime = mVmRegimes.at(EVmRegimeTypeBaseType(EVmRegimeType::VS));
+    auto hs_regime = mVmRegimes.at(EVmRegimeTypeBaseType(EVmRegimeType::HS));
+
+    VmMapper* vs_mapper = vs_regime ? vs_regime->CurrentVmMapper() : nullptr;
+    VmMapper* hs_mapper = hs_regime ? hs_regime->CurrentVmMapper() : nullptr;
+
+    if (vs_mapper && hs_mapper) {
+      mpTwoStageMapper = new TwoStageVmMapper(vs_mapper, hs_mapper);
+      mpTwoStageMapper->Setup(mpGenerator);
+      mpTwoStageMapper->Activate();
+    }
   }
 
 }

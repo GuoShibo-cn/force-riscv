@@ -16,3 +16,57 @@ handcar/standalone/
 make_area/
 output/
 build/
+
+# Compiled test outputs
+*.Default.ELF
+*.Default.S
+test_force.Default.*
+
+# Profiling output
+callgrind.out*
+
+# Backup files
+*.bak
+*.bak-*
+*.prev
+*.pre-*
+
+# Generated reports (root level)
+HANDCAR_*_REPORT.md
+HANDCAR_*_AUDIT.md
+HANDCAR_*_MAPPING.md
+HANDCAR_*_PLAN.md
+H_EXTENSION_*.md
+TWO_STAGE_*.md
+
+# Performance reports
+docs/performance_*.md
+
+# Handcar v2 build artifacts
+handcar/build_v2/
+handcar/build_v2.sh
+handcar/Makefile.v2
+handcar/native-wrapper/
+handcar/patcher-v2/
+handcar/spike-upstream-clean/
+handcar/standalone-v2/
+
+# Independent Spike development repository; pinned patch remains tracked by FORCE.
+handcar/dev-spike/
+
+# Handcar .so backup copies
+utils/handcar/handcar_cosim.so.*
+
+# Utility scripts
+utils/verify_two_stage.sh
+
+# PTG integration runtime artifacts
+sim.log
+test_force.Registers.img
+test_ptg_csr_debug*.log
+ptg_two_stage_test.log
+*.Default.ELF
+*.Default.S
+
+# Local editor config
+.opencode/

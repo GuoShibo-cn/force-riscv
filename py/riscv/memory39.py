@@ -16,4 +16,5 @@
 
 
 def configure_memory(interface):
-    interface.addMemoryRange(0, 0, 0x7FFFFFFFFF)
+    # Spike DRAM is at 0x80000000, use 256MB range
+    interface.addMemoryRange(0, 0x80000000, 0x8FFFFFFF)

@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "local_checkout": "handcar/dev-spike",
+  "official_remote": "upstream",
+  "official_url": "https://github.com/riscv-software-src/riscv-isa-sim.git",
+  "official_branch": "master",
+  "integration_branch": "handcar/force-integration",
+  "upstream_base": "4ffd6ba860f4190ceac2716fa3c2cf139e85538f",
+  "integration_commit": "3cd61c76d87a10eadb4e1b6d763de6b8d837c903",
+  "integration_tree": "2489cd9f7a47d9c9759702488f5f2e6522c23c2c",
+  "published_remote": null,
+  "build_lock": "handcar/upstream.lock.json",
+  "maintenance_guide": "docs/HANDCAR_BRANCH_WORKFLOW.md",
+  "notes": [
+    "This records the initial local development commit, not a remotely fetchable dependency.",
+    "Keep master identical to official upstream; rebase only the integration branch after saving a backup ref.",
+    "FORCE builds continue to use the accepted upstream pin and patch until a newly rebased tree passes acceptance.",
+    "The integration tree exactly matches the previously accepted pinned source tree, including inherited formatting and diagnostics."
+  ]
+}

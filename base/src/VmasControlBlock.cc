@@ -40,8 +40,8 @@ using namespace std;
 
 namespace Force {
 
-  VmasControlBlock::VmasControlBlock(EPrivilegeLevelType privType, EMemBankType memType)
-    : VmControlBlock(privType, memType), mGranuleType(EPageGranuleType(0)), mMemoryAttributes(0), mAsid(0), mWriteExecuteNever(false), mpRootPageTable(nullptr), mpChoicesAdapter(nullptr), mGranuleSuffix(), mPteIdentifierSuffix(), mPageTableImplAttr(EMemAttributeImplType(0)), mpPtCompatibleImplAttrs(nullptr)
+  VmasControlBlock::VmasControlBlock(EPrivilegeLevelType privType, EMemBankType memType, uint32 stage)
+    : VmControlBlock(privType, memType, stage), mGranuleType(EPageGranuleType(0)), mMemoryAttributes(0), mAsid(0), mWriteExecuteNever(false), mpRootPageTable(nullptr), mpChoicesAdapter(nullptr), mGranuleSuffix(), mPteIdentifierSuffix(), mPageTableImplAttr(EMemAttributeImplType(0)), mpPtCompatibleImplAttrs(nullptr)
   {
   }
 

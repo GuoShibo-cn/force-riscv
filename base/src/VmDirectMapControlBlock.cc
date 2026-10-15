@@ -26,8 +26,8 @@ using namespace std;
 
 namespace Force {
 
-  VmDirectMapControlBlock::VmDirectMapControlBlock(EPrivilegeLevelType elType, EMemBankType memType)
-    : VmControlBlock(elType, memType)
+  VmDirectMapControlBlock::VmDirectMapControlBlock(EPrivilegeLevelType privType, EMemBankType memType, uint32 stage)
+    : VmControlBlock(privType, memType, stage)
   {
   }
 

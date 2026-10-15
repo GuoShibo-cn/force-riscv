@@ -282,7 +282,8 @@ namespace Force {
     void SetPagingRegime(const VmPagingRegime* pPagingRegime) { mpPagingRegime = pPagingRegime; } //!< Set pointer to parent paging regime.
     VmAddressSpace* CreateAddressSpace(const VmContext* pVmContext = nullptr); //!< Create an VmAddressSpace object based on vmContextParameters.
     VmAddressSpace* FindAddressSpace(const VmContext& rVmContext); //!< Find VmAddressSpace that matches the VmContext object if exist.
-    const VmAddressSpace* CurrentAddressSpace() { return mpCurrentAddressSpace; } //!< get CurrentAddressSpace.
+    const VmAddressSpace* CurrentAddressSpace() const { return mpCurrentAddressSpace; } //!< get CurrentAddressSpace (const version).
+    VmAddressSpace* CurrentAddressSpace() { return mpCurrentAddressSpace; } //!< get CurrentAddressSpace (non-const version).
   protected:
     VmPagingMapper(const VmPagingMapper& rOther) : VmMapper(rOther), Object(rOther), mpCurrentAddressSpace(nullptr), mpPagingRegime(nullptr), mpAddressTagging(nullptr), mAddressSpaces() { } //!< Copy constructor.
     virtual VmAddressSpace* AddressSpaceInstance(VmasControlBlock* pVmasCtlrBlock) const; //!< Return a bare-bone VmAddressSpace object.

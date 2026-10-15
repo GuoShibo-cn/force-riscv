@@ -33,8 +33,12 @@ namespace Force {
     const std::string ToString() const override; //!< Return the VmInfoRISCV in string format.
     void GetCurrentStates(const Generator& rGen) override; //!< Obtain the current RISC-V VM attributes.
     bool PagingEnabled() const override; //!< Indicate whether paging is enabled in the specified VM.
+    bool IsTwoStageTranslation() const; //!< Return true if two-stage (VS + G-stage) translation is active.
+    EPagingMode GStagePagingMode() const; //!< Return the G-stage (hgatp) paging mode.
   protected:
     const std::string GetRegisterNameForField(EVmInfoBoolType attrType, const Generator& rGen) const override; //!< Get the register name associated with the VmInfo boolean attribute.
+  private:
+    EPagingMode mGStagePagingMode = EPagingMode::Bare; //!< Cached G-stage paging mode
   };
 
 }

@@ -49,8 +49,8 @@ using namespace std;
 
 namespace Force {
 
-  VmasControlBlockRISCV::VmasControlBlockRISCV(EPrivilegeLevelType privType, EMemBankType memType)
-    : VmasControlBlock(privType, memType), mRegisterPrefix("m")
+  VmasControlBlockRISCV::VmasControlBlockRISCV(EPrivilegeLevelType privType, EMemBankType memType, uint32 stage)
+    : VmasControlBlock(privType, memType, stage), mRegisterPrefix("m")
   {
     privilege_prefix(mRegisterPrefix, privType, false);
   }
@@ -170,7 +170,11 @@ namespace Force {
         pte_shift = 2;
         break;
       case EPagingMode::Sv39:
+      case EPagingMode::Sv39x4:
       case EPagingMode::Sv48:
+      case EPagingMode::Sv48x4:
+      case EPagingMode::Sv57:
+      case EPagingMode::Sv57x4:
         pte_shift = 3;
         break;
       default:
@@ -207,10 +211,18 @@ namespace Force {
         highest_va_bit = 31;
         break;
       case EPagingMode::Sv39:
+      case EPagingMode::Sv39x4:
         highest_va_bit = 38;
         break;
       case EPagingMode::Sv48:
+      case EPagingMode::Sv48x4:
         highest_va_bit = 47;
+        break;
+      case EPagingMode::Sv57:
+        highest_va_bit = 56;
+        break;
+      case EPagingMode::Sv57x4:
+        highest_va_bit = 58;
         break;
       default:
         LOG(fail) << "{VmasControlBlockRISCV::HighestVaBitCurrent} Unknown paging mode " << EPagingMode_to_string(paging_info->GetPagingMode()) << endl;
@@ -287,16 +299,25 @@ namespace Force {
         tableLowBit = 22;
         break;
       case EPagingMode::Sv39:
+      case EPagingMode::Sv39x4:
         pteSize = 3;
         tableStep = 9;
         maxTableLevel = 2;
         tableLowBit = 30;
         break;
       case EPagingMode::Sv48:
+      case EPagingMode::Sv48x4:
         pteSize = 3;
         tableStep = 9;
         maxTableLevel = 3;
         tableLowBit = 39;
+        break;
+      case EPagingMode::Sv57:
+      case EPagingMode::Sv57x4:
+        pteSize = 3;
+        tableStep = 9;
+        maxTableLevel = 4;
+        tableLowBit = 48;
         break;
       default:
         LOG(fail) << "{VmasControlBlockRISCV::SetupRootPageTable} Unknown paging mode " << EPagingMode_to_string(paging_info->GetPagingMode()) << endl;

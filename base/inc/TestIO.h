@@ -17,6 +17,7 @@
 #define Force_TestIO_H
 
 #include <map>
+#include <string>
 
 #include "Defines.h"
 

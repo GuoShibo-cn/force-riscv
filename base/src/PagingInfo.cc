@@ -275,8 +275,8 @@ namespace Force {
 
     const auto find_iter = mPteSet.find(pfull_id);
     if (find_iter != mPteSet.end()) {
-      LOG(fail) << "Duplicated PTE full name \'" << pfull_id << "\'." << endl;
-      FAIL("duplicated-pte-full-name");
+      LOG(trace) << "PTE '" << pfull_id << "' already registered, skipping duplicate." << endl;
+      delete pteStruct;
     } else {
       mPteSet[pfull_id] = pteStruct;
     }

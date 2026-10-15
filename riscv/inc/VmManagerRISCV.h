@@ -31,15 +31,19 @@ namespace Force {
     const std::string ToString() const override { return Type(); } //!< Return a string describing the VmManagerRISCV object.
     const char* Type() const override { return "VmManagerRISCV"; }
 
-    VmManagerRISCV() : VmManager() { } //!< Default constructor.
+    VmManagerRISCV() : VmManager(), mTwoStageSetupDone(false) { } //!< Default constructor.
     ~VmManagerRISCV(); //!< Destructor.
 
+    void Update() override; //!< Override to lazily set up two-stage translation.
+    void SetupTwoStageRISCV(); //!< Setup two-stage translation for RISC-V H-extension.
     VmInfo* VmInfoInstance() const override; //!< Return an RISCV VmInfo instance.
   protected:
     VmManagerRISCV(const VmManagerRISCV& rOther); //!< Copy constructor.
     VmFactory* VmFactoryInstance(EVmRegimeType vmRegimeType) const override; //!< Return an VmFactory object based on the RISC-V VM architecture type.
+  private:
+    bool mTwoStageSetupDone; //!< Guard to avoid repeated two-stage setup.
   };
 
-};
+}
 
 #endif

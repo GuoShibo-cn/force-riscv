@@ -21,6 +21,7 @@
 #include "GenException.h"
 #include "Log.h"
 #include "SimEvent.h"
+#include "SimApiHANDCAR.h"
 
 using namespace std;
 
@@ -328,8 +329,11 @@ int SimThreadInsertInterruptEvent::Process() {
 //!< return true when end-test condition reached
 
 bool SimThread::EndTest(uint64_t nextPC) {
-  if (nextPC == mCurrentPC)
-    return true;
+  if (nextPC == mCurrentPC) {
+    const auto handcar = dynamic_cast<const SimApiHANDCAR*>(SimPtr());
+    if (handcar && handcar->LastStepWasSelfLoop()) return true;
+    throw SimulationError("ERROR: stationary PC without a decoded non-trapping terminal self-loop");
+  }
   mCurrentPC = nextPC;
   return false;
 }

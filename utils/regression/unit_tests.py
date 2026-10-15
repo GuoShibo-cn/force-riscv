@@ -103,16 +103,16 @@ def unit_tests():
     if not force_path:
         try:
             force_path = os.environ["FORCE_PATH"]
-        except KeyError as ke:
+        except KeyError:
             force_path = "."
             print('Default FORCE_PATH=".".')
 
     force_path = os.path.abspath(force_path)
     (_, unit_tests_path) = verify_force_path(force_path)
 
-    run_unit_tests(unit_tests_path, process_max, print_fails, nopicky, clean_build)
+    num_fails = run_unit_tests(unit_tests_path, process_max, print_fails, nopicky, clean_build)
 
-    sys.exit(0)
+    sys.exit(1 if num_fails else 0)
 
 
 def run_unit_tests(unit_tests_path, num_parallel_workers, print_fails, nopicky, clean_build):
@@ -166,6 +166,8 @@ def run_unit_tests(unit_tests_path, num_parallel_workers, print_fails, nopicky, 
         for output in bufp:
             print(output)
         print("%s failures.\n" % (num_fails))
+
+    return num_fails
 
 
 def run_one_unit_test(nopicky, clean_build, arg_tuple):
@@ -225,7 +227,9 @@ def execute_command(cmd):
 
 
 def log_output(output, test_path, file_name):
-    with open(os.path.join(test_path, "bin", file_name), "w") as log_file:
+    bin_dir = os.path.join(test_path, "bin")
+    os.makedirs(bin_dir, exist_ok=True)
+    with open(os.path.join(bin_dir, file_name), "w") as log_file:
         log_file.write(output)
 
 

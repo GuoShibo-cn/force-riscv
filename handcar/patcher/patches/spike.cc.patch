@@ -1483,14 +1483,14 @@
 >     return 2;
 >   }
 > 
->   if(_pSimulatorTopLevel->sparse_is_pa_initialized(static_cast<reg_t>(*addr), static_cast<size_t>(length)))
->   {
->     _pSimulatorTopLevel->sparse_write(static_cast<reg_t>(*addr), data, static_cast<size_t>(length));
->   }
->   else
->   {
->     _pSimulatorTopLevel->initialize_multiword(static_cast<reg_t>(*addr), static_cast<size_t>(length), data);
->   }
+>   std::vector<uint8_t> attrs(length, 0);
+>   _pSimulatorTopLevel->sparse_initialize_pa(
+>     static_cast<reg_t>(*addr),
+>     data,
+>     attrs.data(),
+>     static_cast<uint32_t>(length),
+>     Force::EMemDataType::Both
+>   );
 > 
 >   return 0;
 > }

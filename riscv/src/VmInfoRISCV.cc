@@ -40,14 +40,19 @@ namespace Force {
     {
       return EVmRegimeType::M;
     }
-    else if (mPrivilegeLevelType == EPrivilegeLevelType::S || mPrivilegeLevelType == EPrivilegeLevelType::U)
+    else if (mPrivilegeLevelType == EPrivilegeLevelType::H)
+    {
+      return EVmRegimeType::HS;
+    }
+    else if (mPrivilegeLevelType == EPrivilegeLevelType::S)
     {
       return EVmRegimeType::S;
     }
-    /*else if (mPrivilegeLevelType == EPrivilegeLevelType::U)
+    // U-mode: if virtualized (v=1), it's VS regime; otherwise S regime
+    else if (mPrivilegeLevelType == EPrivilegeLevelType::U)
     {
-      return EVmRegimeType::U;
-    }*/
+      return EVmRegimeType::S;
+    }
 
     return EVmRegimeType::M;
   }
@@ -77,6 +82,19 @@ namespace Force {
     GetRegisterFieldState(mstatus_reg, EVmInfoBoolType::TVM); //Trap Virtual Memory - if paging enable will cause exceptions on all vm ops
     //need MPP to determine paging enabled for priv=m MPRV=1 MPP=S
     //this can create a new unique case where instr's are direct mapped and data accesses are translated via 'S' addr translation and protection
+
+    // Read G-stage paging mode from hgatp register (only if initialized)
+    auto hgatp_reg = reg_file->RegisterLookup("hgatp");
+    if (hgatp_reg && hgatp_reg->IsInitialized()) {
+      uint64 val = 0;
+      try { val = hgatp_reg->Value(); } catch (...) { return; }
+      uint32 mode = (val >> 60) & 0xF;
+      switch (mode) {
+        case 8: mGStagePagingMode = EPagingMode::Sv39x4; break;
+        case 9: mGStagePagingMode = EPagingMode::Sv48x4; break;
+        default: mGStagePagingMode = EPagingMode::Bare; break;
+      }
+    }
   }
 
   const string VmInfoRISCV::GetRegisterNameForField(EVmInfoBoolType attrType, const Generator& rGen) const
@@ -107,6 +125,26 @@ namespace Force {
     //  data accesses are paging enabled/instructions are not
 
     return false;
+  }
+
+  bool VmInfoRISCV::IsTwoStageTranslation() const
+  {
+    // Two-stage translation is active when both VS-stage (vsatp MODE != Bare)
+    // and G-stage (hgatp MODE != Bare) translation are enabled.
+    // This requires the hypervisor extension and VS/HS regime.
+    if (mPrivilegeLevelType != EPrivilegeLevelType::S) {
+      return false;
+    }
+    // Check if we have both vsatp and hgatp MODE fields set (non-Bare)
+    bool vsatp_enabled = BoolAttribute(EVmInfoBoolType::MODE);
+    // For two-stage, we need both stages active; vsatp MODE indicates VS-stage,
+    // and G-stage mode is checked via GStagePagingMode().
+    return vsatp_enabled && (GStagePagingMode() != EPagingMode::Bare);
+  }
+
+  EPagingMode VmInfoRISCV::GStagePagingMode() const
+  {
+    return mGStagePagingMode;
   }
 
 }

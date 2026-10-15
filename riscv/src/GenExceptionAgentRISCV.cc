@@ -28,6 +28,7 @@
 #include "Enums.h"
 #include "ExceptionManager.h"
 #include "GenRequest.h"
+#include "GenPC.h"
 #include "Generator.h"
 #include "Log.h"
 #include "PageRequestRegulator.h"
@@ -53,11 +54,13 @@ using namespace std;
 namespace Force {
 
   GenExceptionAgentRISCV::GenExceptionAgentRISCV()
-    : GenExceptionAgent(), mArgRegIndices(), mFastMode(false), mAddrTableEC()
+    : GenExceptionAgent(), mArgRegIndices(), mFastMode(false), mAddrTableEC(),
+      mCachedHedeleg(0), mCachedHideleg(0), mHedelegCached(false), mHidelegCached(false)
   { }
 
   GenExceptionAgentRISCV::GenExceptionAgentRISCV(const GenExceptionAgentRISCV& rOther)
-    : GenExceptionAgent(rOther), mArgRegIndices(), mFastMode(false), mAddrTableEC()
+    : GenExceptionAgent(rOther), mArgRegIndices(), mFastMode(false), mAddrTableEC(),
+      mCachedHedeleg(0), mCachedHideleg(0), mHedelegCached(false), mHidelegCached(false)
   { }
 
   Object* GenExceptionAgentRISCV::Clone() const
@@ -188,8 +191,15 @@ namespace Force {
     auto peState = new PeStateUpdate();
     if (mpGenerator->HasISS() == false) {
       peState->UpdateState("PrivilegeLevel", "Set", targetPrivLevel);
-      string status_name = (targetPrivLevel == 3) ? "mstatus" : "sstatus";
-      string pp_field_name = (targetPrivLevel == 3) ? "MPP" : "SPP";
+      string status_name;
+      string pp_field_name;
+      if (targetPrivLevel == 3) {
+        status_name = "mstatus"; pp_field_name = "MPP";
+      } else if (targetPrivLevel == 2) {
+        status_name = "mstatus"; pp_field_name = "MPP";  // mstatus.MPP records HS-mode
+      } else {
+        status_name = "sstatus"; pp_field_name = "SPP";
+      }
       peState->UpdateRegisterField(status_name, pp_field_name, targetPrivLevel);
 
       if(not mpGenerator->InSpeculative()){
@@ -331,6 +341,9 @@ namespace Force {
         mAddrTableEC.insert(uint64(EExceptionClassType::InstrPageFault));
         mAddrTableEC.insert(uint64(EExceptionClassType::LoadPageFault));
         mAddrTableEC.insert(uint64(EExceptionClassType::StoreAmoPageFault));
+        mAddrTableEC.insert(uint64(EExceptionClassType::InstrGuestPageFault));
+        mAddrTableEC.insert(uint64(EExceptionClassType::LoadGuestPageFault));
+        mAddrTableEC.insert(uint64(EExceptionClassType::StoreAmoGuestPageFault));
       //}
     }
     else if (function == "AddrTableEC") {
@@ -349,12 +362,120 @@ namespace Force {
     EExceptionClassType ec_type = EExceptionClassType(except_req->Id());
     /* Allow only certain types of exceptions to be taken while in another exception */
     switch (ec_type) {
+    case EExceptionClassType::InstrGuestPageFault:
+    case EExceptionClassType::LoadGuestPageFault:
+    case EExceptionClassType::StoreAmoGuestPageFault:
+    case EExceptionClassType::VirtualInstruction:
+      return true;
     default:
       DiagnoseExceptionDefault(ec_type, rErrInfo);
       return false;
     }
 
     return false;
+  }
+
+  void GenExceptionAgentRISCV::HandleException()
+  {
+    auto except_req = mpExceptionRequest->CastInstance<GenHandleException>();
+    EExceptionClassType ec_type = EExceptionClassType(except_req->Id());
+
+    LOG(notice) << "{GenExceptionAgentRISCV::HandleException} exception ID 0x" << hex << except_req->Id()
+                << " (" << EExceptionClassType_to_string(ec_type) << ")" << dec << endl;
+
+    // Check if this is a guest page fault
+    if (ec_type == EExceptionClassType::InstrGuestPageFault ||
+        ec_type == EExceptionClassType::LoadGuestPageFault ||
+        ec_type == EExceptionClassType::StoreAmoGuestPageFault) {
+
+      LOG(notice) << "{GenExceptionAgentRISCV::HandleException} detected guest page fault, calling handler" << endl;
+
+      EPagingExceptionType pf_type = EExceptionClassTypeToPagingExceptionType(ec_type);
+      GenerateGuestPageFaultHandler(pf_type);
+      return;  // Guest page fault handled, don't fall through to base class
+    }
+
+    // Invalidate hedeleg/hideleg cache before delegation check (registers may have changed)
+    InvalidateRegisterCache();
+
+    // Check hypervisor trap delegation (hedeleg)
+    if (IsExceptionDelegatedToVS(ec_type)) {
+      LOG(notice) << "{GenExceptionAgentRISCV::HandleException} exception delegated to VS-mode via hedeleg" << endl;
+      // Exception is delegated to VS-mode, handle accordingly
+      // The base class HandleException will handle the privilege switch
+    }
+
+    // Call base class HandleException
+    GenExceptionAgent::HandleException();
+  }
+
+  // Map EExceptionClassType (FORCE internal) to RISC-V mcause exception code.
+  // hedeleg bit positions follow the RISC-V spec mcause layout, not FORCE's
+  // internal EExceptionClassType numbering (which inserts EnvCallFromVU/HS at 10-11).
+  static uint32 ECTypeToMcause(EExceptionClassType ec_type)
+  {
+    switch (ec_type) {
+    case EExceptionClassType::InstrAddrMisaligned:        return 0;
+    case EExceptionClassType::InstrAccessFault:           return 1;
+    case EExceptionClassType::IllegalInstr:               return 2;
+    case EExceptionClassType::Breakpoint:                 return 3;
+    case EExceptionClassType::LoadAddrMisaligned:         return 4;
+    case EExceptionClassType::LoadAccessFault:            return 5;
+    case EExceptionClassType::StoreAmoAddrMisaligned:     return 6;
+    case EExceptionClassType::StoreAmoAccessFault:        return 7;
+    case EExceptionClassType::EnvCallFromUMode:           return 8;
+    case EExceptionClassType::EnvCallFromSMode:           return 9;
+    case EExceptionClassType::EnvCallFromVU:              return 10;
+    case EExceptionClassType::EnvCallFromHS:              return 11;
+    case EExceptionClassType::EnvCallFromMMode:           return 11;
+    case EExceptionClassType::InstrPageFault:             return 12;
+    case EExceptionClassType::LoadPageFault:              return 13;
+    case EExceptionClassType::StoreAmoPageFault:          return 15;
+    case EExceptionClassType::InstrGuestPageFault:        return 20;
+    case EExceptionClassType::LoadGuestPageFault:         return 21;
+    case EExceptionClassType::StoreAmoGuestPageFault:     return 23;
+    case EExceptionClassType::VirtualInstruction:         return 22;
+    default:                                              return static_cast<uint32>(ec_type);
+    }
+  }
+
+  bool GenExceptionAgentRISCV::IsExceptionDelegatedToVS(EExceptionClassType ec_type) const
+  {
+    // Check if the exception is delegated to VS-mode via hedeleg register
+    // Use cached value if available
+    if (!mHedelegCached) {
+      const RegisterFile* reg_file = mpGenerator->GetRegisterFile();
+      Register* hedeleg_reg = reg_file->RegisterLookup("hedeleg");
+
+      if (hedeleg_reg == nullptr || !hedeleg_reg->IsInitialized()) {
+        return false;
+      }
+
+      mCachedHedeleg = hedeleg_reg->Value();
+      mHedelegCached = true;
+    }
+
+    // Use mcause-based bit position for hedeleg check (not EExceptionClassType value)
+    uint32 exc_bit = ECTypeToMcause(ec_type);
+
+    // Check if the corresponding bit is set in hedeleg
+    if (exc_bit < 64) {
+      bool delegated = (mCachedHedeleg >> exc_bit) & 0x1;
+      if (delegated) {
+        LOG(notice) << "{GenExceptionAgentRISCV::IsExceptionDelegatedToVS} exception 0x" << hex << exc_bit
+                    << " delegated to VS-mode (hedeleg=0x" << mCachedHedeleg << ")" << dec << endl;
+      }
+      return delegated;
+    }
+
+    return false;
+  }
+
+  void GenExceptionAgentRISCV::InvalidateRegisterCache()
+  {
+    mHedelegCached = false;
+    mHidelegCached = false;
+    LOG(trace) << "{GenExceptionAgentRISCV::InvalidateRegisterCache} register cache invalidated" << endl;
   }
 
   bool GenExceptionAgentRISCV::NeedRecoveryAddress() const
@@ -365,29 +486,38 @@ namespace Force {
     cuint32 priv_level = mpGenerator->PrivilegeLevel();
     const RegisterFile* reg_file = mpGenerator->GetRegisterFile();
 
-    if (priv_level == cuint32(EPrivilegeLevelType::S))
+    if (priv_level == cuint32(EPrivilegeLevelType::S) || priv_level == cuint32(EPrivilegeLevelType::H))
     {
-      //We are in supervisor mode (0b01) so we look to the scause register for the EC value.
-      Register* scause_reg = reg_file->RegisterLookup("scause");
-      if (not scause_reg->IsInitialized()) {
-        LOG(warn) << "{GenExceptionAgentRISCV::NeedRecoveryAddress} function is called but scause was not initialized." << endl;
-        LOG(notice) << "{GenExceptionAgentRISCV::NeedRecoveryAddress} function is called but scause was not initialized." << endl;
-	mpGenerator->RandomInitializeRegister("scause","");
+      // Determine if we are in VS-mode (V=1) or regular S/HS mode
+      bool is_vs_mode = false;
+      if (priv_level == cuint32(EPrivilegeLevelType::S)) {
+        uint64 v_val = 0;
+        mpGenerator->ReadRegister("virtual", "MODE", v_val);
+        is_vs_mode = (v_val & 0x1) != 0;
+      }
+      const char* cause_reg_name = is_vs_mode ? "vscause" : "scause";
+
+      //We are in supervisor/hypervisor mode, look to the cause register for the EC value.
+      Register* cause_reg = reg_file->RegisterLookup(cause_reg_name);
+      if (not cause_reg->IsInitialized()) {
+        LOG(warn) << "{GenExceptionAgentRISCV::NeedRecoveryAddress} " << cause_reg_name << " was not initialized." << endl;
+        LOG(notice) << "{GenExceptionAgentRISCV::NeedRecoveryAddress} " << cause_reg_name << " was not initialized." << endl;
+        mpGenerator->RandomInitializeRegister(cause_reg_name,"");
       }
 
       //Is the interrupt bit enabled? If so we don't need a recovery address
-      uint64 interrupt_bit = scause_reg->RegisterFieldLookup("INTERRUPT")->FieldValue();
+      uint64 interrupt_bit = cause_reg->RegisterFieldLookup("INTERRUPT")->FieldValue();
       if (interrupt_bit == uint64(1u))
       {
         recovery_exception = false;
-	need_check_ec = false;
+        need_check_ec = false;
       }
       else
       {
         //This is not an interrupt. Determine EC.
-        ec_val = scause_reg->RegisterFieldLookup("EXCEPTION CODE_VAR")->FieldValue();
-        LOG(notice) << "{GenExceptionAgentRISCV::NeedRecoveryAddress} found ec value for scause: " << ec_val  << endl;
-	need_check_ec = true;
+        ec_val = cause_reg->RegisterFieldLookup("EXCEPTION CODE_VAR")->FieldValue();
+        LOG(notice) << "{GenExceptionAgentRISCV::NeedRecoveryAddress} found ec value for " << cause_reg_name << ": " << ec_val  << endl;
+        need_check_ec = true;
       }
     }
     else if (priv_level == cuint32(EPrivilegeLevelType::M))
@@ -451,6 +581,106 @@ namespace Force {
     ExceptionManager::Instance()->AddHandlerBounds(EMemBankTypeBaseType(EMemBankType::Default), boundaries_list);
   }
 
+  void GenExceptionAgentRISCV::GenerateGuestPageFaultHandler(EPagingExceptionType guestPfType)
+  {
+    LOG(notice) << "{GenExceptionAgentRISCV::GenerateGuestPageFaultHandler} handling guest page fault type: "
+                << EPagingExceptionType_to_string(guestPfType) << endl;
+
+    // For Guest Page Faults, set up the hypervisor trap value registers:
+    // htval: Contains the faulting Guest Virtual Address (GVA) bits[63:2]
+    // htinst: Contains the trapped instruction or a pseudo-instruction encoding
+
+    const RegisterFile* reg_file = mpGenerator->GetRegisterFile();
+
+    // Get faulting GVA from stval or mtval register
+    uint64 faulting_gva = 0;
+    Register* stval_reg = reg_file->RegisterLookup("stval");
+    if (stval_reg != nullptr && stval_reg->IsInitialized()) {
+      faulting_gva = stval_reg->Value();
+      LOG(notice) << "{GenExceptionAgentRISCV::GenerateGuestPageFaultHandler} faulting GVA from stval: 0x"
+                  << hex << faulting_gva << dec << endl;
+    } else {
+      Register* mtval_reg = reg_file->RegisterLookup("mtval");
+      if (mtval_reg != nullptr && mtval_reg->IsInitialized()) {
+        faulting_gva = mtval_reg->Value();
+        LOG(notice) << "{GenExceptionAgentRISCV::GenerateGuestPageFaultHandler} faulting GVA from mtval: 0x"
+                    << hex << faulting_gva << dec << endl;
+      } else {
+        // Fallback: use PC as faulting address
+        faulting_gva = mpGenerator->GetGenPC()->Value();
+        LOG(warn) << "{GenExceptionAgentRISCV::GenerateGuestPageFaultHandler} using PC as faulting GVA: 0x"
+                  << hex << faulting_gva << dec << endl;
+      }
+    }
+
+    // htval holds bits [63:2] of the faulting guest virtual address
+    Register* htval_reg = reg_file->RegisterLookup("htval");
+    if (htval_reg != nullptr) {
+      // Set htval with faulting GVA bits[63:2]
+      uint64 htval_value = (faulting_gva >> 2) & 0xFFFFFFFFFFFFFFCULL;
+      
+      LOG(notice) << "{GenExceptionAgentRISCV::GenerateGuestPageFaultHandler} htval set to 0x" 
+                  << hex << htval_value << " (GVA bits[63:2])" << dec << endl;
+      
+      // Generate instruction to set htval register
+      mpGenerator->AddPostInstructionStepRequest(
+        new GenSetRegister(htval_reg, htval_value)
+      );
+    }
+
+    // htinst holds the trapped instruction or a pseudo-instruction encoding
+    Register* htinst_reg = reg_file->RegisterLookup("htinst");
+    if (htinst_reg != nullptr) {
+      // For guest page faults, htinst contains:
+      // - Bits [1:0] = 00: full instruction
+      // - Bits [1:0] = 10: pseudo-instruction encoding
+      // - Bits [15:2]: instruction bits or transformation value
+      
+      uint64 htinst_value = 0;
+      
+      // Set pseudo-instruction flag for guest page faults
+      htinst_value |= 0x2; // bits[1:0] = 10 for pseudo-instruction
+      
+      // Set the transformation value based on fault type
+      switch (guestPfType) {
+        case EPagingExceptionType::InstrGuestPageFault:
+          htinst_value |= (0x0 << 2); // Instruction fetch
+          break;
+        case EPagingExceptionType::LoadGuestPageFault:
+          htinst_value |= (0x1 << 2); // Load
+          break;
+        case EPagingExceptionType::StoreAmoGuestPageFault:
+          htinst_value |= (0x2 << 2); // Store/AMO
+          break;
+        default:
+          break;
+      }
+      
+      LOG(notice) << "{GenExceptionAgentRISCV::GenerateGuestPageFaultHandler} htinst set to 0x" 
+                  << hex << htinst_value << dec << endl;
+      
+      mpGenerator->AddPostInstructionStepRequest(
+        new GenSetRegister(htinst_reg, htinst_value)
+      );
+    }
+
+    // Log the specific guest page fault type for debugging
+    switch (guestPfType) {
+    case EPagingExceptionType::InstrGuestPageFault:
+      LOG(notice) << "{GenExceptionAgentRISCV::GenerateGuestPageFaultHandler} Instruction Guest Page Fault - G-stage translation fault on instruction fetch" << endl;
+      break;
+    case EPagingExceptionType::LoadGuestPageFault:
+      LOG(notice) << "{GenExceptionAgentRISCV::GenerateGuestPageFaultHandler} Load Guest Page Fault - G-stage translation fault on load" << endl;
+      break;
+    case EPagingExceptionType::StoreAmoGuestPageFault:
+      LOG(notice) << "{GenExceptionAgentRISCV::GenerateGuestPageFaultHandler} Store/AMO Guest Page Fault - G-stage translation fault on store/AMO" << endl;
+      break;
+    default:
+      LOG(warn) << "{GenExceptionAgentRISCV::GenerateGuestPageFaultHandler} unknown guest page fault type" << endl;
+      break;
+    }
+  }
+
   EExceptionVectorType GenExceptionAgentRISCV::GetExceptionVectorType(const string& vecStr) const
   {
     return string_to_EExceptionVectorType(vecStr);
@@ -468,6 +698,22 @@ namespace Force {
       if (vstart_reg->Value() != 0) {
         mpGenerator->AddPostInstructionStepRequest(new GenLoadRegister("vstart", 0));
       }
+    }
+  }
+
+  EPagingExceptionType GenExceptionAgentRISCV::EExceptionClassTypeToPagingExceptionType(EExceptionClassType ec_type) const
+  {
+    switch (ec_type) {
+      case EExceptionClassType::InstrGuestPageFault:
+        return EPagingExceptionType::InstrGuestPageFault;
+      case EExceptionClassType::LoadGuestPageFault:
+        return EPagingExceptionType::LoadGuestPageFault;
+      case EExceptionClassType::StoreAmoGuestPageFault:
+        return EPagingExceptionType::StoreAmoGuestPageFault;
+      default:
+        LOG(warn) << "{GenExceptionAgentRISCV::EExceptionClassTypeToPagingExceptionType} unexpected exception class type: "
+                  << EExceptionClassType_to_string(ec_type) << endl;
+        return EPagingExceptionType::InstructionPageFault; // Default fallback
     }
   }
 

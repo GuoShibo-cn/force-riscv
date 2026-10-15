@@ -235,7 +235,7 @@ namespace Force {
   }
 
 
-  unsigned char EVmContextParamTypeSize = 10;
+  unsigned char EVmContextParamTypeSize = 16;
 
   const string EVmContextParamType_to_string(EVmContextParamType in_enum)
   {
@@ -250,6 +250,12 @@ namespace Force {
     case EVmContextParamType::SBE: return "SBE";
     case EVmContextParamType::UBE: return "UBE";
     case EVmContextParamType::TVM: return "TVM";
+    case EVmContextParamType::VGEIN: return "VGEIN";
+    case EVmContextParamType::VMID: return "VMID";
+    case EVmContextParamType::GVA: return "GVA";
+    case EVmContextParamType::VSXL: return "VSXL";
+    case EVmContextParamType::SPV: return "SPV";
+    case EVmContextParamType::SPVP: return "SPVP";
     default:
       unknown_enum_value("EVmContextParamType", (unsigned char)(in_enum));
     }
@@ -262,6 +268,7 @@ namespace Force {
     size_t size = in_str.size();
     char hash_value = in_str.at(2 < size ? 2 : 2 % size) ^ in_str.at(3 < size ? 3 : 3 % size);
 
+
     switch (hash_value) {
     case 1:
       validate(in_str, "MODE", enum_type_name);
@@ -272,12 +279,29 @@ namespace Force {
     case 4:
       validate(in_str, "MPRV", enum_type_name);
       return EVmContextParamType::MPRV;
+    case 5:
+      validate(in_str, "SPV", enum_type_name);
+      return EVmContextParamType::SPV;
+    case 6:
+      if (in_str == "GVA")  return EVmContextParamType::GVA;
+      if (in_str == "SPVP") return EVmContextParamType::SPVP;
+      unknown_enum_name(enum_type_name, in_str);
+      return EVmContextParamType::MODE;
     case 8:
       validate(in_str, "MBE", enum_type_name);
       return EVmContextParamType::MBE;
+    case 12:
+      validate(in_str, "VGEIN", enum_type_name);
+      return EVmContextParamType::VGEIN;
+    case 13:
+      validate(in_str, "VMID", enum_type_name);
+      return EVmContextParamType::VMID;
     case 16:
       validate(in_str, "UBE", enum_type_name);
       return EVmContextParamType::UBE;
+    case 20:
+      validate(in_str, "VSXL", enum_type_name);
+      return EVmContextParamType::VSXL;
     case 22:
       validate(in_str, "SBE", enum_type_name);
       return EVmContextParamType::SBE;
@@ -305,6 +329,7 @@ namespace Force {
     size_t size = in_str.size();
     char hash_value = in_str.at(2 < size ? 2 : 2 % size) ^ in_str.at(3 < size ? 3 : 3 % size);
 
+
     switch (hash_value) {
     case 1:
       okay = (in_str == "MODE");
@@ -315,12 +340,31 @@ namespace Force {
     case 4:
       okay = (in_str == "MPRV");
       return EVmContextParamType::MPRV;
+    case 5:
+      okay = (in_str == "SPV");
+      return EVmContextParamType::SPV;
+    case 6:
+      okay = (in_str == "GVA" || in_str == "SPVP");
+      if (okay) {
+        if (in_str == "GVA") return EVmContextParamType::GVA;
+        return EVmContextParamType::SPVP;
+      }
+      return EVmContextParamType::MODE;
     case 8:
       okay = (in_str == "MBE");
       return EVmContextParamType::MBE;
+    case 12:
+      okay = (in_str == "VGEIN");
+      return EVmContextParamType::VGEIN;
+    case 13:
+      okay = (in_str == "VMID");
+      return EVmContextParamType::VMID;
     case 16:
       okay = (in_str == "UBE");
       return EVmContextParamType::UBE;
+    case 20:
+      okay = (in_str == "VSXL");
+      return EVmContextParamType::VSXL;
     case 22:
       okay = (in_str == "SBE");
       return EVmContextParamType::SBE;
@@ -439,7 +483,7 @@ namespace Force {
   }
 
 
-  unsigned char EPteAttributeTypeSize = 11;
+  unsigned char EPteAttributeTypeSize = 13;
 
   const string EPteAttributeType_to_string(EPteAttributeType in_enum)
   {
@@ -455,6 +499,8 @@ namespace Force {
     case EPteAttributeType::X: return "X";
     case EPteAttributeType::WR: return "WR";
     case EPteAttributeType::V: return "V";
+    case EPteAttributeType::RSW2: return "RSW2";
+    case EPteAttributeType::N: return "N";
     default:
       unknown_enum_value("EPteAttributeType", (unsigned char)(in_enum));
     }
@@ -465,27 +511,30 @@ namespace Force {
   {
     string enum_type_name = "EPteAttributeType";
     size_t size = in_str.size();
-    char hash_value = in_str.at(0) ^ in_str.at(1 < size ? 1 : 1 % size) ^ in_str.at(9 < size ? 9 : 9 % size);
+    char hash_value = in_str.at(0) ^ in_str.at(6 < size ? 6 : 6 % size) ^ in_str.at(7 < size ? 7 : 7 % size);
 
     switch (hash_value) {
-    case 64:
-      validate(in_str, "IGNORED", enum_type_name);
-      return EPteAttributeType::IGNORED;
+    case 49:
+      validate(in_str, "RES0", enum_type_name);
+      return EPteAttributeType::RES0;
+    case 55:
+      validate(in_str, "RSW2", enum_type_name);
+      return EPteAttributeType::RSW2;
     case 65:
-      validate(in_str, "Address", enum_type_name);
-      return EPteAttributeType::Address;
-    case 68:
       validate(in_str, "DA", enum_type_name);
       return EPteAttributeType::DA;
+    case 68:
+      validate(in_str, "IGNORED", enum_type_name);
+      return EPteAttributeType::IGNORED;
     case 71:
       validate(in_str, "G", enum_type_name);
       return EPteAttributeType::G;
-    case 79:
-      validate(in_str, "SystemPage", enum_type_name);
-      return EPteAttributeType::SystemPage;
+    case 78:
+      validate(in_str, "N", enum_type_name);
+      return EPteAttributeType::N;
     case 82:
-      validate(in_str, "RES0", enum_type_name);
-      return EPteAttributeType::RES0;
+      validate(in_str, "WR", enum_type_name);
+      return EPteAttributeType::WR;
     case 83:
       validate(in_str, "RSW", enum_type_name);
       return EPteAttributeType::RSW;
@@ -495,12 +544,15 @@ namespace Force {
     case 86:
       validate(in_str, "V", enum_type_name);
       return EPteAttributeType::V;
-    case 87:
-      validate(in_str, "WR", enum_type_name);
-      return EPteAttributeType::WR;
     case 88:
       validate(in_str, "X", enum_type_name);
       return EPteAttributeType::X;
+    case 98:
+      validate(in_str, "SystemPage", enum_type_name);
+      return EPteAttributeType::SystemPage;
+    case 115:
+      validate(in_str, "Address", enum_type_name);
+      return EPteAttributeType::Address;
     default:
       unknown_enum_name(enum_type_name, in_str);
     }
@@ -511,27 +563,30 @@ namespace Force {
   {
     okay = true;
     size_t size = in_str.size();
-    char hash_value = in_str.at(0) ^ in_str.at(1 < size ? 1 : 1 % size) ^ in_str.at(9 < size ? 9 : 9 % size);
+    char hash_value = in_str.at(0) ^ in_str.at(6 < size ? 6 : 6 % size) ^ in_str.at(7 < size ? 7 : 7 % size);
 
     switch (hash_value) {
-    case 64:
-      okay = (in_str == "IGNORED");
-      return EPteAttributeType::IGNORED;
+    case 49:
+      okay = (in_str == "RES0");
+      return EPteAttributeType::RES0;
+    case 55:
+      okay = (in_str == "RSW2");
+      return EPteAttributeType::RSW2;
     case 65:
-      okay = (in_str == "Address");
-      return EPteAttributeType::Address;
-    case 68:
       okay = (in_str == "DA");
       return EPteAttributeType::DA;
+    case 68:
+      okay = (in_str == "IGNORED");
+      return EPteAttributeType::IGNORED;
     case 71:
       okay = (in_str == "G");
       return EPteAttributeType::G;
-    case 79:
-      okay = (in_str == "SystemPage");
-      return EPteAttributeType::SystemPage;
+    case 78:
+      okay = (in_str == "N");
+      return EPteAttributeType::N;
     case 82:
-      okay = (in_str == "RES0");
-      return EPteAttributeType::RES0;
+      okay = (in_str == "WR");
+      return EPteAttributeType::WR;
     case 83:
       okay = (in_str == "RSW");
       return EPteAttributeType::RSW;
@@ -541,12 +596,15 @@ namespace Force {
     case 86:
       okay = (in_str == "V");
       return EPteAttributeType::V;
-    case 87:
-      okay = (in_str == "WR");
-      return EPteAttributeType::WR;
     case 88:
       okay = (in_str == "X");
       return EPteAttributeType::X;
+    case 98:
+      okay = (in_str == "SystemPage");
+      return EPteAttributeType::SystemPage;
+    case 115:
+      okay = (in_str == "Address");
+      return EPteAttributeType::Address;
     default:
       okay = false;
       return EPteAttributeType::Address;
@@ -599,71 +657,99 @@ namespace Force {
   }
 
 
-  unsigned char EPagingModeSize = 4;
+   unsigned char EPagingModeSize = 8;
 
-  const string EPagingMode_to_string(EPagingMode in_enum)
-  {
-    switch (in_enum) {
-    case EPagingMode::Bare: return "Bare";
-    case EPagingMode::Sv32: return "Sv32";
-    case EPagingMode::Sv39: return "Sv39";
-    case EPagingMode::Sv48: return "Sv48";
-    default:
-      unknown_enum_value("EPagingMode", (unsigned char)(in_enum));
-    }
-    return "";
-  }
+   const string EPagingMode_to_string(EPagingMode in_enum)
+   {
+     switch (in_enum) {
+     case EPagingMode::Bare: return "Bare";
+     case EPagingMode::Sv32: return "Sv32";
+     case EPagingMode::Sv39: return "Sv39";
+     case EPagingMode::Sv48: return "Sv48";
+     case EPagingMode::Sv39x4: return "Sv39x4";
+     case EPagingMode::Sv48x4: return "Sv48x4";
+     case EPagingMode::Sv57: return "Sv57";
+     case EPagingMode::Sv57x4: return "Sv57x4";
+     default:
+       unknown_enum_value("EPagingMode", (unsigned char)(in_enum));
+     }
+     return "";
+   }
 
   EPagingMode string_to_EPagingMode(const string& in_str)
   {
     string enum_type_name = "EPagingMode";
     size_t size = in_str.size();
-    char hash_value = in_str.at(3 < size ? 3 : 3 % size);
+    char hash_value = in_str.at(3 < size ? 3 : 3 % size) ^ in_str.at(4 < size ? 4 : 4 % size);
 
-    switch (hash_value) {
-    case 50:
-      validate(in_str, "Sv32", enum_type_name);
-      return EPagingMode::Sv32;
-    case 56:
-      validate(in_str, "Sv48", enum_type_name);
-      return EPagingMode::Sv48;
-    case 57:
-      validate(in_str, "Sv39", enum_type_name);
-      return EPagingMode::Sv39;
-    case 101:
-      validate(in_str, "Bare", enum_type_name);
-      return EPagingMode::Bare;
-    default:
-      unknown_enum_name(enum_type_name, in_str);
-    }
-    return EPagingMode::Bare;
-  }
+     switch (hash_value) {
+     case 39:
+       validate(in_str, "Bare", enum_type_name);
+       return EPagingMode::Bare;
+     case 64:
+       validate(in_str, "Sv48x4", enum_type_name);
+       return EPagingMode::Sv48x4;
+     case 65:
+       validate(in_str, "Sv39x4", enum_type_name);
+       return EPagingMode::Sv39x4;
+     case 79:
+       validate(in_str, "Sv57x4", enum_type_name);
+       return EPagingMode::Sv57x4;
+     case 97:
+       validate(in_str, "Sv32", enum_type_name);
+       return EPagingMode::Sv32;
+     case 100:
+       validate(in_str, "Sv57", enum_type_name);
+       return EPagingMode::Sv57;
+     case 106:
+       validate(in_str, "Sv39", enum_type_name);
+       return EPagingMode::Sv39;
+     case 107:
+       validate(in_str, "Sv48", enum_type_name);
+       return EPagingMode::Sv48;
+     default:
+       unknown_enum_name(enum_type_name, in_str);
+     }
+     return EPagingMode::Bare;
+   }
 
   EPagingMode try_string_to_EPagingMode(const string& in_str, bool& okay)
   {
     okay = true;
     size_t size = in_str.size();
-    char hash_value = in_str.at(3 < size ? 3 : 3 % size);
+    char hash_value = in_str.at(3 < size ? 3 : 3 % size) ^ in_str.at(4 < size ? 4 : 4 % size);
 
-    switch (hash_value) {
-    case 50:
-      okay = (in_str == "Sv32");
-      return EPagingMode::Sv32;
-    case 56:
-      okay = (in_str == "Sv48");
-      return EPagingMode::Sv48;
-    case 57:
-      okay = (in_str == "Sv39");
-      return EPagingMode::Sv39;
-    case 101:
-      okay = (in_str == "Bare");
-      return EPagingMode::Bare;
-    default:
-      okay = false;
-      return EPagingMode::Bare;
-    }
-    return EPagingMode::Bare;
-  }
+     switch (hash_value) {
+     case 39:
+       okay = (in_str == "Bare");
+       return EPagingMode::Bare;
+     case 64:
+       okay = (in_str == "Sv48x4");
+       return EPagingMode::Sv48x4;
+     case 65:
+       okay = (in_str == "Sv39x4");
+       return EPagingMode::Sv39x4;
+     case 79:
+       okay = (in_str == "Sv57x4");
+       return EPagingMode::Sv57x4;
+     case 97:
+       okay = (in_str == "Sv32");
+       return EPagingMode::Sv32;
+     case 100:
+       okay = (in_str == "Sv57");
+       return EPagingMode::Sv57;
+     case 106:
+       okay = (in_str == "Sv39");
+       return EPagingMode::Sv39;
+     case 107:
+       okay = (in_str == "Sv48");
+       return EPagingMode::Sv48;
+     default:
+       okay = false;
+       return EPagingMode::Bare;
+     }
+     return EPagingMode::Bare;
+   }
 
 
   unsigned char EPageGenBoolAttrTypeSize = 12;
@@ -789,7 +875,7 @@ namespace Force {
   }
 
 
-  unsigned char EPagingExceptionTypeSize = 6;
+  unsigned char EPagingExceptionTypeSize = 9;
 
   const string EPagingExceptionType_to_string(EPagingExceptionType in_enum)
   {
@@ -800,6 +886,9 @@ namespace Force {
     case EPagingExceptionType::InstructionPageFault: return "InstructionPageFault";
     case EPagingExceptionType::LoadPageFault: return "LoadPageFault";
     case EPagingExceptionType::StoreAmoPageFault: return "StoreAmoPageFault";
+    case EPagingExceptionType::InstrGuestPageFault: return "InstrGuestPageFault";
+    case EPagingExceptionType::LoadGuestPageFault: return "LoadGuestPageFault";
+    case EPagingExceptionType::StoreAmoGuestPageFault: return "StoreAmoGuestPageFault";
     default:
       unknown_enum_value("EPagingExceptionType", (unsigned char)(in_enum));
     }
@@ -810,27 +899,36 @@ namespace Force {
   {
     string enum_type_name = "EPagingExceptionType";
     size_t size = in_str.size();
-    char hash_value = in_str.at(12 < size ? 12 : 12 % size);
+    char hash_value = in_str.at(13 < size ? 13 : 13 % size);
 
     switch (hash_value) {
     case 70:
+      validate(in_str, "LoadGuestPageFault", enum_type_name);
+      return EPagingExceptionType::LoadGuestPageFault;
+    case 76:
+      validate(in_str, "LoadPageFault", enum_type_name);
+      return EPagingExceptionType::LoadPageFault;
+    case 80:
+      validate(in_str, "StoreAmoGuestPageFault", enum_type_name);
+      return EPagingExceptionType::StoreAmoGuestPageFault;
+    case 97:
       validate(in_str, "StoreAmoPageFault", enum_type_name);
       return EPagingExceptionType::StoreAmoPageFault;
-    case 97:
-      validate(in_str, "InstructionPageFault", enum_type_name);
-      return EPagingExceptionType::InstructionPageFault;
     case 99:
       validate(in_str, "InstructionAccessFault", enum_type_name);
       return EPagingExceptionType::InstructionAccessFault;
+    case 101:
+      validate(in_str, "InstrGuestPageFault", enum_type_name);
+      return EPagingExceptionType::InstrGuestPageFault;
+    case 103:
+      validate(in_str, "InstructionPageFault", enum_type_name);
+      return EPagingExceptionType::InstructionPageFault;
+    case 108:
+      validate(in_str, "LoadAccessFault", enum_type_name);
+      return EPagingExceptionType::LoadAccessFault;
     case 115:
       validate(in_str, "StoreAmoAccessFault", enum_type_name);
       return EPagingExceptionType::StoreAmoAccessFault;
-    case 116:
-      validate(in_str, "LoadPageFault", enum_type_name);
-      return EPagingExceptionType::LoadPageFault;
-    case 117:
-      validate(in_str, "LoadAccessFault", enum_type_name);
-      return EPagingExceptionType::LoadAccessFault;
     default:
       unknown_enum_name(enum_type_name, in_str);
     }
@@ -841,27 +939,36 @@ namespace Force {
   {
     okay = true;
     size_t size = in_str.size();
-    char hash_value = in_str.at(12 < size ? 12 : 12 % size);
+    char hash_value = in_str.at(13 < size ? 13 : 13 % size);
 
     switch (hash_value) {
     case 70:
+      okay = (in_str == "LoadGuestPageFault");
+      return EPagingExceptionType::LoadGuestPageFault;
+    case 76:
+      okay = (in_str == "LoadPageFault");
+      return EPagingExceptionType::LoadPageFault;
+    case 80:
+      okay = (in_str == "StoreAmoGuestPageFault");
+      return EPagingExceptionType::StoreAmoGuestPageFault;
+    case 97:
       okay = (in_str == "StoreAmoPageFault");
       return EPagingExceptionType::StoreAmoPageFault;
-    case 97:
-      okay = (in_str == "InstructionPageFault");
-      return EPagingExceptionType::InstructionPageFault;
     case 99:
       okay = (in_str == "InstructionAccessFault");
       return EPagingExceptionType::InstructionAccessFault;
+    case 101:
+      okay = (in_str == "InstrGuestPageFault");
+      return EPagingExceptionType::InstrGuestPageFault;
+    case 103:
+      okay = (in_str == "InstructionPageFault");
+      return EPagingExceptionType::InstructionPageFault;
+    case 108:
+      okay = (in_str == "LoadAccessFault");
+      return EPagingExceptionType::LoadAccessFault;
     case 115:
       okay = (in_str == "StoreAmoAccessFault");
       return EPagingExceptionType::StoreAmoAccessFault;
-    case 116:
-      okay = (in_str == "LoadPageFault");
-      return EPagingExceptionType::LoadPageFault;
-    case 117:
-      okay = (in_str == "LoadAccessFault");
-      return EPagingExceptionType::LoadAccessFault;
     default:
       okay = false;
       return EPagingExceptionType::InstructionAccessFault;
@@ -1211,7 +1318,7 @@ namespace Force {
   }
 
 
-  unsigned char EExceptionClassTypeSize = 14;
+  unsigned char EExceptionClassTypeSize = 20;
 
   const string EExceptionClassType_to_string(EExceptionClassType in_enum)
   {
@@ -1226,10 +1333,16 @@ namespace Force {
     case EExceptionClassType::StoreAmoAccessFault: return "StoreAmoAccessFault";
     case EExceptionClassType::EnvCallFromUMode: return "EnvCallFromUMode";
     case EExceptionClassType::EnvCallFromSMode: return "EnvCallFromSMode";
+    case EExceptionClassType::EnvCallFromVU: return "EnvCallFromVU";
+    case EExceptionClassType::EnvCallFromHS: return "EnvCallFromHS";
     case EExceptionClassType::EnvCallFromMMode: return "EnvCallFromMMode";
     case EExceptionClassType::InstrPageFault: return "InstrPageFault";
     case EExceptionClassType::LoadPageFault: return "LoadPageFault";
     case EExceptionClassType::StoreAmoPageFault: return "StoreAmoPageFault";
+    case EExceptionClassType::InstrGuestPageFault: return "InstrGuestPageFault";
+    case EExceptionClassType::LoadGuestPageFault: return "LoadGuestPageFault";
+    case EExceptionClassType::StoreAmoGuestPageFault: return "StoreAmoGuestPageFault";
+    case EExceptionClassType::VirtualInstruction: return "VirtualInstruction";
     default:
       unknown_enum_value("EExceptionClassType", (unsigned char)(in_enum));
     }
@@ -1240,49 +1353,67 @@ namespace Force {
   {
     string enum_type_name = "EExceptionClassType";
     size_t size = in_str.size();
-    char hash_value = in_str.at(11 < size ? 11 : 11 % size) ^ in_str.at(13 < size ? 13 : 13 % size);
+    char hash_value = in_str.at(3 < size ? 3 : 3 % size) ^ in_str.at(11 < size ? 11 : 11 % size) ^ in_str.at(17 < size ? 17 : 17 % size);
 
     switch (hash_value) {
-    case 1:
-      validate(in_str, "InstrPageFault", enum_type_name);
-      return EExceptionClassType::InstrPageFault;
-    case 4:
+    case 68:
       validate(in_str, "StoreAmoPageFault", enum_type_name);
       return EExceptionClassType::StoreAmoPageFault;
-    case 8:
-      validate(in_str, "LoadAddrMisaligned", enum_type_name);
-      return EExceptionClassType::LoadAddrMisaligned;
-    case 13:
-      validate(in_str, "LoadAccessFault", enum_type_name);
-      return EExceptionClassType::LoadAccessFault;
-    case 19:
-      validate(in_str, "Breakpoint", enum_type_name);
-      return EExceptionClassType::Breakpoint;
-    case 22:
-      validate(in_str, "StoreAmoAccessFault", enum_type_name);
-      return EExceptionClassType::StoreAmoAccessFault;
-    case 27:
-      validate(in_str, "StoreAmoAddrMisaligned", enum_type_name);
-      return EExceptionClassType::StoreAmoAddrMisaligned;
-    case 30:
-      validate(in_str, "IllegalInstr", enum_type_name);
-      return EExceptionClassType::IllegalInstr;
-    case 31:
-      validate(in_str, "InstrAddrMisaligned", enum_type_name);
-      return EExceptionClassType::InstrAddrMisaligned;
-    case 32:
+    case 71:
+      validate(in_str, "StoreAmoGuestPageFault", enum_type_name);
+      return EExceptionClassType::StoreAmoGuestPageFault;
+    case 88:
       validate(in_str, "LoadPageFault", enum_type_name);
       return EExceptionClassType::LoadPageFault;
-    case 34:
-      validate(in_str, "EnvCallFromMMode", enum_type_name);
-      return EExceptionClassType::EnvCallFromMMode;
-    case 51:
+    case 92:
       validate(in_str, "InstrAccessFault", enum_type_name);
       return EExceptionClassType::InstrAccessFault;
-    case 58:
+    case 96:
+      validate(in_str, "EnvCallFromMMode", enum_type_name);
+      return EExceptionClassType::EnvCallFromMMode;
+    case 97:
+      validate(in_str, "LoadAddrMisaligned", enum_type_name);
+      return EExceptionClassType::LoadAddrMisaligned;
+    case 98:
+      validate(in_str, "InstrAddrMisaligned", enum_type_name);
+      return EExceptionClassType::InstrAddrMisaligned;
+    case 100:
+      validate(in_str, "LoadAccessFault", enum_type_name);
+      return EExceptionClassType::LoadAccessFault;
+    case 104:
+      validate(in_str, "VirtualInstruction", enum_type_name);
+      return EExceptionClassType::VirtualInstruction;
+    case 105:
+      validate(in_str, "StoreAmoAddrMisaligned", enum_type_name);
+      return EExceptionClassType::StoreAmoAddrMisaligned;
+    case 106:
+      validate(in_str, "EnvCallFromHS", enum_type_name);
+      return EExceptionClassType::EnvCallFromHS;
+    case 116:
+      validate(in_str, "EnvCallFromVU", enum_type_name);
+      return EExceptionClassType::EnvCallFromVU;
+    case 117:
+      validate(in_str, "InstrPageFault", enum_type_name);
+      return EExceptionClassType::InstrPageFault;
+    case 118:
+      validate(in_str, "IllegalInstr", enum_type_name);
+      return EExceptionClassType::IllegalInstr;
+    case 119:
+      validate(in_str, "LoadGuestPageFault", enum_type_name);
+      return EExceptionClassType::LoadGuestPageFault;
+    case 120:
       validate(in_str, "EnvCallFromUMode", enum_type_name);
       return EExceptionClassType::EnvCallFromUMode;
-    case 60:
+    case 121:
+      validate(in_str, "InstrGuestPageFault", enum_type_name);
+      return EExceptionClassType::InstrGuestPageFault;
+    case 122:
+      validate(in_str, "Breakpoint", enum_type_name);
+      return EExceptionClassType::Breakpoint;
+    case 123:
+      validate(in_str, "StoreAmoAccessFault", enum_type_name);
+      return EExceptionClassType::StoreAmoAccessFault;
+    case 126:
       validate(in_str, "EnvCallFromSMode", enum_type_name);
       return EExceptionClassType::EnvCallFromSMode;
     default:
@@ -1295,49 +1426,67 @@ namespace Force {
   {
     okay = true;
     size_t size = in_str.size();
-    char hash_value = in_str.at(11 < size ? 11 : 11 % size) ^ in_str.at(13 < size ? 13 : 13 % size);
+    char hash_value = in_str.at(3 < size ? 3 : 3 % size) ^ in_str.at(11 < size ? 11 : 11 % size) ^ in_str.at(17 < size ? 17 : 17 % size);
 
     switch (hash_value) {
-    case 1:
-      okay = (in_str == "InstrPageFault");
-      return EExceptionClassType::InstrPageFault;
-    case 4:
+    case 68:
       okay = (in_str == "StoreAmoPageFault");
       return EExceptionClassType::StoreAmoPageFault;
-    case 8:
-      okay = (in_str == "LoadAddrMisaligned");
-      return EExceptionClassType::LoadAddrMisaligned;
-    case 13:
-      okay = (in_str == "LoadAccessFault");
-      return EExceptionClassType::LoadAccessFault;
-    case 19:
-      okay = (in_str == "Breakpoint");
-      return EExceptionClassType::Breakpoint;
-    case 22:
-      okay = (in_str == "StoreAmoAccessFault");
-      return EExceptionClassType::StoreAmoAccessFault;
-    case 27:
-      okay = (in_str == "StoreAmoAddrMisaligned");
-      return EExceptionClassType::StoreAmoAddrMisaligned;
-    case 30:
-      okay = (in_str == "IllegalInstr");
-      return EExceptionClassType::IllegalInstr;
-    case 31:
-      okay = (in_str == "InstrAddrMisaligned");
-      return EExceptionClassType::InstrAddrMisaligned;
-    case 32:
+    case 71:
+      okay = (in_str == "StoreAmoGuestPageFault");
+      return EExceptionClassType::StoreAmoGuestPageFault;
+    case 88:
       okay = (in_str == "LoadPageFault");
       return EExceptionClassType::LoadPageFault;
-    case 34:
-      okay = (in_str == "EnvCallFromMMode");
-      return EExceptionClassType::EnvCallFromMMode;
-    case 51:
+    case 92:
       okay = (in_str == "InstrAccessFault");
       return EExceptionClassType::InstrAccessFault;
-    case 58:
+    case 96:
+      okay = (in_str == "EnvCallFromMMode");
+      return EExceptionClassType::EnvCallFromMMode;
+    case 97:
+      okay = (in_str == "LoadAddrMisaligned");
+      return EExceptionClassType::LoadAddrMisaligned;
+    case 98:
+      okay = (in_str == "InstrAddrMisaligned");
+      return EExceptionClassType::InstrAddrMisaligned;
+    case 100:
+      okay = (in_str == "LoadAccessFault");
+      return EExceptionClassType::LoadAccessFault;
+    case 104:
+      okay = (in_str == "VirtualInstruction");
+      return EExceptionClassType::VirtualInstruction;
+    case 105:
+      okay = (in_str == "StoreAmoAddrMisaligned");
+      return EExceptionClassType::StoreAmoAddrMisaligned;
+    case 106:
+      okay = (in_str == "EnvCallFromHS");
+      return EExceptionClassType::EnvCallFromHS;
+    case 116:
+      okay = (in_str == "EnvCallFromVU");
+      return EExceptionClassType::EnvCallFromVU;
+    case 117:
+      okay = (in_str == "InstrPageFault");
+      return EExceptionClassType::InstrPageFault;
+    case 118:
+      okay = (in_str == "IllegalInstr");
+      return EExceptionClassType::IllegalInstr;
+    case 119:
+      okay = (in_str == "LoadGuestPageFault");
+      return EExceptionClassType::LoadGuestPageFault;
+    case 120:
       okay = (in_str == "EnvCallFromUMode");
       return EExceptionClassType::EnvCallFromUMode;
-    case 60:
+    case 121:
+      okay = (in_str == "InstrGuestPageFault");
+      return EExceptionClassType::InstrGuestPageFault;
+    case 122:
+      okay = (in_str == "Breakpoint");
+      return EExceptionClassType::Breakpoint;
+    case 123:
+      okay = (in_str == "StoreAmoAccessFault");
+      return EExceptionClassType::StoreAmoAccessFault;
+    case 126:
       okay = (in_str == "EnvCallFromSMode");
       return EExceptionClassType::EnvCallFromSMode;
     default:

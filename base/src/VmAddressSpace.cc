@@ -182,6 +182,10 @@ namespace Force {
 
   bool VmAddressSpace::CompatiblePageTableContext(const VmAddressSpace* pOtherVmas) const
   {
+    if (mpControlBlock->Stage() != pOtherVmas->GetControlBlock()->Stage() ||
+        string(mpControlBlock->Type()) != pOtherVmas->GetControlBlock()->Type()) {
+      return false;
+    }
     //use control block of other vmas and call comparison against this Vmas control block, return true if the two contexts can share all mappings
     //return mpControlBlock->CompatiblePageTableContext(pOtherVmas->GetControlBlock());
     return true;
@@ -557,6 +561,13 @@ namespace Force {
     return trans_result;
   }
 
+  bool VmAddressSpace::LookupVirtualAddress(uint64 va, uint64& rPa, bool isInstr) const
+  {
+    uint32 bank = 0;
+    ETranslationResultType result = TranslateVaToPa(va, rPa, bank);
+    return (result == ETranslationResultType::Mapped);
+  }
+
   ETranslationResultType VmAddressSpace::TranslatePaToVa(uint64 PA, EMemBankType bank, uint64& VA) const
   {
     ETranslationResultType trans_result = ETranslationResultType::NotMapped;
@@ -790,6 +801,13 @@ namespace Force {
 
   const Page* VmAddressSpace::CreatePage(uint64 VA, uint64 size, GenPageRequest* pPageReq, PageSizeInfo& rSizeInfo, string& rErrMsg)
   {
+    uint64 target_pa = 0;
+    if (pPageReq->GetAttributeValue(EPageRequestAttributeType::PA, target_pa) &&
+        ((VA ^ target_pa) & rSizeInfo.mPageMask)) {
+      rErrMsg += "target PA has an incompatible page offset";
+      return nullptr;
+    }
+
     rSizeInfo.UpdateStart(VA);
     if (not VirtualMappingAvailable(rSizeInfo.Start(), rSizeInfo.End())) {
       rErrMsg += string_snprintf(128, "{VmAddressSpace::CreatePage} page for VA=%#llx will overlap existing pages with page size: ", VA) + EPteType_to_string(rSizeInfo.mType);

@@ -21,7 +21,7 @@
     <physical_register index="0x3" name="fcsr" size="64" type="SysReg"/>
     <physical_register index="0x4" name="uie" size="64" type="SysReg"/>
     <physical_register index="0x5" name="utvec" size="64" type="SysReg"/>
-    <physical_register index="0x8" name="vstart" size="64" type="SysReg"/>
+    <physical_register index="0x8" name="vstart" reset="0" size="64" type="SysReg"/>
     <physical_register index="0x9" name="vxsat" size="64" type="SysReg"/>
     <physical_register index="0xa" name="vxrm" size="64" type="SysReg"/>
     <physical_register index="0x40" name="uscratch" size="64" type="SysReg"/>
@@ -39,11 +39,14 @@
     <physical_register index="0x143" name="stval" size="64" type="SysReg"/>
     <physical_register index="0x180" name="satp" size="64" type="SysReg"/>
     <physical_register index="0x200" name="vsstatus" size="64" type="SysReg"/>
+    <physical_register index="0x204" name="vsie" size="64" type="SysReg"/>
     <physical_register index="0x205" name="vstvec" size="64" type="SysReg"/>
+    <physical_register index="0x206" name="vscounteren" size="32" type="SysReg"/>
     <physical_register index="0x240" name="vsscratch" size="64" type="SysReg"/>
     <physical_register index="0x241" name="vsepc" size="64" type="SysReg"/>
     <physical_register index="0x242" name="vscause" size="64" type="SysReg"/>
     <physical_register index="0x243" name="vstval" size="64" type="SysReg"/>
+    <physical_register index="0x244" name="vsip" size="64" type="SysReg"/>
     <physical_register index="0x280" name="vsatp" size="64" type="SysReg"/>
     <physical_register index="0x300" name="mstatus" size="64" type="SysReg"/>
     <physical_register index="0x301" name="misa" size="64" type="SysReg"/>
@@ -108,11 +111,17 @@
     <physical_register index="0x3be" name="pmpaddr14" size="64" type="SysReg"/>
     <physical_register index="0x3bf" name="pmpaddr15" size="64" type="SysReg"/>
     <physical_register index="0x600" name="hstatus" size="64" type="SysReg"/>
+    <physical_register index="0x645" name="hvip" reset="0" size="64" type="SysReg"/>
     <physical_register index="0x602" name="hedeleg" size="64" type="SysReg"/>
     <physical_register index="0x603" name="hideleg" size="64" type="SysReg"/>
     <physical_register index="0x604" name="hie" size="64" type="SysReg"/>
+    <physical_register index="0x605" name="htimedelta" size="64" type="SysReg"/>
     <physical_register index="0x606" name="hcounteren" size="32" type="SysReg"/>
     <physical_register index="0x607" name="hgeie" size="64" type="SysReg"/>
+    <physical_register index="0x60a" name="henvcfg" size="64" type="SysReg"/>
+    <physical_register index="0x61a" name="henvcfgH" size="32" type="SysReg"/>
+    <physical_register index="0x608" name="hvien" size="64" type="SysReg"/>
+    <physical_register index="0x609" name="hvictl" size="64" type="SysReg"/>
     <physical_register index="0x643" name="htval" size="64" type="SysReg"/>
     <physical_register index="0x644" name="hip" size="64" type="SysReg"/>
     <physical_register index="0x64a" name="htinst" size="64" type="SysReg"/>
@@ -122,6 +131,7 @@
     <physical_register index="0x7b2" name="dscratch0" size="64" type="SysReg"/>
     <physical_register index="0x7b3" name="dscratch1" size="64" type="SysReg"/>
     <physical_register class="ConfigureRegister" index="0x7c0" name="privilege" size="2" type="Internal"/>
+    <physical_register class="ConfigureRegister" index="0x7c1" name="virtual" size="1" type="Internal"/>
     <physical_register index="0xb00" name="mcycle" size="64" type="SysReg"/>
     <physical_register index="0xb02" name="minstret" size="64" type="SysReg"/>
     <physical_register index="0xb03" name="mhpmcounter3" size="64" type="SysReg"/>
@@ -188,7 +198,7 @@
     <physical_register index="0xc20" name="vl" size="64" type="SysReg"/>
     <physical_register index="0xc21" name="vtype" size="64" type="SysReg"/>
     <physical_register index="0xc22" name="vlenb" reset="0x10" size="64" type="SysReg"/>
-    <physical_register index="0xe07" name="hgeip" reset="0" size="64" type="SysReg"/>
+    <physical_register index="0xe12" name="hgeip" reset="0" size="64" type="SysReg"/>
     <physical_register index="0xf11" name="mvendorid" reset="0" size="32" type="SysReg"/>
     <physical_register index="0xf12" name="marchid" reset="0" size="64" type="SysReg"/>
     <physical_register index="0xf13" name="mimpid" reset="0" size="64" type="SysReg"/>
@@ -572,7 +582,20 @@
         <bit_field shift="1" size="1"/>
       </register_field>
     </register>
-    <register boot="0" index="0x204" name="vsie" size="64" type="SysReg"/>
+    <register boot="0" index="0x204" name="vsie" size="64" type="SysReg">
+      <register_field name="VSSIE" physical_register="vsie" size="1">
+        <bit_field shift="2" size="1"/>
+      </register_field>
+      <register_field name="VSTIE" physical_register="vsie" size="1">
+        <bit_field shift="6" size="1"/>
+      </register_field>
+      <register_field name="VSEIE" physical_register="vsie" size="1">
+        <bit_field shift="10" size="1"/>
+      </register_field>
+      <register_field name="WPRI_FILL" physical_register="vsie" size="51">
+        <bit_field shift="0" size="2"/><bit_field shift="3" size="3"/><bit_field shift="7" size="3"/><bit_field shift="11" size="1"/><bit_field shift="12" size="52"/>
+      </register_field>
+    </register>
     <register boot="1" index="0x205" name="vstvec" size="64" type="SysReg">
       <register_field name="BASE_VAR" physical_register="vstvec" size="62">
         <bit_field shift="2" size="62"/>
@@ -580,6 +603,17 @@
       <register_field name="MODE" physical_register="vstvec" size="2">
         <bit_field shift="0" size="2"/>
       </register_field>
+    </register>
+    <register boot="0" index="0x206" name="vscounteren" size="32" type="SysReg">
+      <register_field name="HPM31" physical_register="vscounteren" size="1"><bit_field shift="31" size="1"/></register_field>
+      <register_field name="HPM30" physical_register="vscounteren" size="1"><bit_field shift="30" size="1"/></register_field>
+      <register_field name="HPM6" physical_register="vscounteren" size="1"><bit_field shift="6" size="1"/></register_field>
+      <register_field name="HPM5" physical_register="vscounteren" size="1"><bit_field shift="5" size="1"/></register_field>
+      <register_field name="HPM4" physical_register="vscounteren" size="1"><bit_field shift="4" size="1"/></register_field>
+      <register_field name="HPM3" physical_register="vscounteren" size="1"><bit_field shift="3" size="1"/></register_field>
+      <register_field name="IR" physical_register="vscounteren" size="1"><bit_field shift="2" size="1"/></register_field>
+      <register_field name="TM" physical_register="vscounteren" size="1"><bit_field shift="1" size="1"/></register_field>
+      <register_field name="CY" physical_register="vscounteren" size="1"><bit_field shift="0" size="1"/></register_field>
     </register>
     <register boot="1" index="0x240" name="vsscratch" size="64" type="SysReg">
       <register_field name="VSSCRATCH_VAR" physical_register="vsscratch" size="64">
@@ -604,7 +638,17 @@
         <bit_field shift="0" size="64"/>
       </register_field>
     </register>
-    <register boot="0" index="0x244" name="vsip" size="64" type="SysReg"/>
+    <register boot="0" index="0x244" name="vsip" size="64" type="SysReg">
+      <register_field name="VSSIP" physical_register="vsip" size="1">
+        <bit_field shift="2" size="1"/>
+      </register_field>
+      <register_field name="VTIP" physical_register="vsip" size="1">
+        <bit_field shift="6" size="1"/>
+      </register_field>
+      <register_field name="VSEIP" physical_register="vsip" size="1">
+        <bit_field shift="10" size="1"/>
+      </register_field>
+    </register>
     <register boot="1" index="0x280" name="vsatp" size="64" type="SysReg">
       <register_field name="MODE" physical_register="vsatp" size="4">
         <bit_field shift="60" size="4"/>
@@ -1196,48 +1240,251 @@
     <register boot="0" index="0x3be" name="pmpaddr14" size="64" type="SysReg"/>
     <register boot="0" index="0x3bf" name="pmpaddr15" size="64" type="SysReg"/>
     <register boot="1" index="0x600" name="hstatus" size="64" type="SysReg">
-      <register_field name="WPRI_VAR" physical_register="hstatus" size="30">
-        <bit_field shift="34" size="30"/>
+      <register_field name="WPRI_TOP" physical_register="hstatus" size="14">
+        <bit_field shift="50" size="14"/>
+      </register_field>
+      <register_field name="HUPMM" physical_register="hstatus" size="2">
+        <bit_field shift="48" size="2"/>
+      </register_field>
+      <register_field name="WPRI_UPPER" physical_register="hstatus" size="14">
+        <bit_field shift="34" size="14"/>
       </register_field>
       <register_field name="VSXL" physical_register="hstatus" size="2">
         <bit_field shift="32" size="2"/>
       </register_field>
-      <register_field name="WPRI" physical_register="hstatus" size="19">
-        <bit_field shift="23" size="9"/>
-        <bit_field shift="21" size="1"/>
-        <bit_field shift="18" size="2"/>
-        <bit_field shift="10" size="2"/>
-        <bit_field shift="6" size="1"/>
-        <bit_field shift="1" size="4"/>
+      <register_field name="WPRI25_31" physical_register="hstatus" size="7">
+        <bit_field shift="25" size="7"/>
+      </register_field>
+      <register_field name="HUKTE" physical_register="hstatus" size="1">
+        <bit_field shift="24" size="1"/>
+      </register_field>
+      <register_field name="WPRI23" physical_register="hstatus" size="1">
+        <bit_field shift="23" size="1"/>
       </register_field>
       <register_field name="VTSR" physical_register="hstatus" size="1">
         <bit_field shift="22" size="1"/>
       </register_field>
+      <register_field name="VTW" physical_register="hstatus" size="1">
+        <bit_field shift="21" size="1"/>
+      </register_field>
       <register_field name="VTVM" physical_register="hstatus" size="1">
         <bit_field shift="20" size="1"/>
+      </register_field>
+      <register_field name="WPRI18_19" physical_register="hstatus" size="2">
+        <bit_field shift="18" size="2"/>
       </register_field>
       <register_field name="VGEIN" physical_register="hstatus" size="6">
         <bit_field shift="12" size="6"/>
       </register_field>
-      <register_field name="SP2V" physical_register="hstatus" size="1">
+      <register_field name="WPRI10_11" physical_register="hstatus" size="2">
+        <bit_field shift="10" size="2"/>
+      </register_field>
+      <register_field name="HU" physical_register="hstatus" size="1">
         <bit_field shift="9" size="1"/>
       </register_field>
-      <register_field name="SP2P" physical_register="hstatus" size="1">
+      <register_field name="SPVP" physical_register="hstatus" size="1">
         <bit_field shift="8" size="1"/>
       </register_field>
       <register_field name="SPV" physical_register="hstatus" size="1">
         <bit_field shift="7" size="1"/>
       </register_field>
+      <register_field name="GVA" physical_register="hstatus" size="1">
+        <bit_field shift="6" size="1"/>
+      </register_field>
       <register_field name="VSBE" physical_register="hstatus" size="1">
         <bit_field shift="5" size="1"/>
+      </register_field>
+      <register_field name="WPRI1_4" physical_register="hstatus" size="4">
+        <bit_field shift="1" size="4"/>
       </register_field>
       <register_field name="SPRV" physical_register="hstatus" size="1">
         <bit_field shift="0" size="1"/>
       </register_field>
     </register>
-    <register boot="0" index="0x602" name="hedeleg" size="64" type="SysReg"/>
-    <register boot="0" index="0x603" name="hideleg" size="64" type="SysReg"/>
-    <register boot="0" index="0x604" name="hie" size="64" type="SysReg"/>
+    <!-- HVIP: Hypervisor Virtual Interrupt Pending -->
+    <register boot="0" index="0x645" name="hvip" size="64" type="SysReg">
+      <register_field name="VSSIP" physical_register="hvip" size="1">
+        <bit_field shift="2" size="1"/>
+      </register_field>
+      <register_field name="VTIP" physical_register="hvip" size="1">
+        <bit_field shift="6" size="1"/>
+      </register_field>
+      <register_field name="VSEIP" physical_register="hvip" size="1">
+        <bit_field shift="10" size="1"/>
+      </register_field>
+      <register_field name="SGEIP" physical_register="hvip" size="1">
+        <bit_field shift="12" size="1"/>
+      </register_field>
+    </register>
+    <!-- HENVCFG: Hypervisor Environment Configuration -->
+    <register boot="0" index="0x60a" name="henvcfg" size="64" type="SysReg">
+      <register_field name="STCE" physical_register="henvcfg" size="1">
+        <bit_field shift="63" size="1"/>
+      </register_field>
+      <register_field name="PBMTE" physical_register="henvcfg" size="1">
+        <bit_field shift="62" size="1"/>
+      </register_field>
+      <register_field name="ADUE" physical_register="henvcfg" size="1">
+        <bit_field shift="61" size="1"/>
+      </register_field>
+      <register_field name="WPRIR" physical_register="henvcfg" size="1">
+        <bit_field shift="60" size="1"/>
+      </register_field>
+      <register_field name="DTE" physical_register="henvcfg" size="1">
+        <bit_field shift="59" size="1"/>
+      </register_field>
+      <register_field name="WPRI_HI" physical_register="henvcfg" size="25">
+        <bit_field shift="34" size="25"/>
+      </register_field>
+      <register_field name="PMM" physical_register="henvcfg" size="2">
+        <bit_field shift="32" size="2"/>
+      </register_field>
+      <register_field name="WPRI_MID" physical_register="henvcfg" size="24">
+        <bit_field shift="8" size="24"/>
+      </register_field>
+      <register_field name="CBZE" physical_register="henvcfg" size="1">
+        <bit_field shift="7" size="1"/>
+      </register_field>
+      <register_field name="CBCFE" physical_register="henvcfg" size="1">
+        <bit_field shift="6" size="1"/>
+      </register_field>
+      <register_field name="CBIE" physical_register="henvcfg" size="2">
+        <bit_field shift="4" size="2"/>
+      </register_field>
+      <register_field name="SSE" physical_register="henvcfg" size="1">
+        <bit_field shift="3" size="1"/>
+      </register_field>
+      <register_field name="LPE" physical_register="henvcfg" size="1">
+        <bit_field shift="2" size="1"/>
+      </register_field>
+      <register_field name="WPRI1" physical_register="henvcfg" size="1">
+        <bit_field shift="1" size="1"/>
+      </register_field>
+      <register_field name="FIOM" physical_register="henvcfg" size="1">
+        <bit_field shift="0" size="1"/>
+      </register_field>
+    </register>
+    <!-- HENVCFGH: Hypervisor Environment Configuration High (RV32 only) -->
+    <register boot="0" index="0x61a" name="henvcfgH" size="32" type="SysReg">
+      <register_field name="WPRI_VAR" physical_register="henvcfgH" size="32"><bit_field shift="0" size="32"/></register_field>
+    </register>
+    <!-- HVIEN: Hypervisor Virtual Interrupt Enable -->
+    <register boot="0" index="0x608" name="hvien" size="64" type="SysReg">
+      <register_field name="WPRI_VAR" physical_register="hvien" size="64">
+        <bit_field shift="0" size="64"/>
+      </register_field>
+    </register>
+    <!-- HVICTL: Hypervisor Virtual Interrupt Control -->
+    <register boot="0" index="0x609" name="hvictl" size="64" type="SysReg">
+      <register_field name="VTI" physical_register="hvictl" size="1">
+        <bit_field shift="30" size="1"/>
+      </register_field>
+      <register_field name="IID" physical_register="hvictl" size="6">
+        <bit_field shift="16" size="6"/>
+      </register_field>
+      <register_field name="WPRIHI" physical_register="hvictl" size="6">
+        <bit_field shift="10" size="6"/>
+      </register_field>
+      <register_field name="DPR" physical_register="hvictl" size="1">
+        <bit_field shift="9" size="1"/>
+      </register_field>
+      <register_field name="IPRIOM" physical_register="hvictl" size="1">
+        <bit_field shift="8" size="1"/>
+      </register_field>
+      <register_field name="IPRIO" physical_register="hvictl" size="8">
+        <bit_field shift="0" size="8"/>
+      </register_field>
+      <register_field name="WPRI_FILL" physical_register="hvictl" size="41">
+        <bit_field shift="22" size="8"/><bit_field shift="31" size="33"/>
+      </register_field>
+    </register>
+    <register boot="0" index="0x602" name="hedeleg" size="64" type="SysReg">
+      <register_field name="EXC0" physical_register="hedeleg" size="1">
+        <bit_field shift="0" size="1"/>
+      </register_field>
+      <register_field name="EXC1" physical_register="hedeleg" size="1">
+        <bit_field shift="1" size="1"/>
+      </register_field>
+      <register_field name="EXC2" physical_register="hedeleg" size="1">
+        <bit_field shift="2" size="1"/>
+      </register_field>
+      <register_field name="EXC3" physical_register="hedeleg" size="1">
+        <bit_field shift="3" size="1"/>
+      </register_field>
+      <register_field name="EXC4" physical_register="hedeleg" size="1">
+        <bit_field shift="4" size="1"/>
+      </register_field>
+      <register_field name="EXC5" physical_register="hedeleg" size="1">
+        <bit_field shift="5" size="1"/>
+      </register_field>
+      <register_field name="EXC6" physical_register="hedeleg" size="1">
+        <bit_field shift="6" size="1"/>
+      </register_field>
+      <register_field name="EXC7" physical_register="hedeleg" size="1">
+        <bit_field shift="7" size="1"/>
+      </register_field>
+      <register_field name="EXC8" physical_register="hedeleg" size="1">
+        <bit_field shift="8" size="1"/>
+      </register_field>
+      <register_field name="EXC9" physical_register="hedeleg" size="1">
+        <bit_field shift="9" size="1"/>
+      </register_field>
+      <register_field name="EXC10" physical_register="hedeleg" size="1">
+        <bit_field shift="10" size="1"/>
+      </register_field>
+      <register_field name="EXC12" physical_register="hedeleg" size="1">
+        <bit_field shift="12" size="1"/>
+      </register_field>
+      <register_field name="EXC13" physical_register="hedeleg" size="1">
+        <bit_field shift="13" size="1"/>
+      </register_field>
+      <register_field name="EXC15" physical_register="hedeleg" size="1">
+        <bit_field shift="15" size="1"/>
+      </register_field>
+      <register_field name="EXC20" physical_register="hedeleg" size="1">
+        <bit_field shift="20" size="1"/>
+      </register_field>
+      <register_field name="EXC21" physical_register="hedeleg" size="1">
+        <bit_field shift="21" size="1"/>
+      </register_field>
+      <register_field name="EXC23" physical_register="hedeleg" size="1">
+        <bit_field shift="23" size="1"/>
+      </register_field>
+      <register_field name="WPRI11" physical_register="hedeleg" size="1"><bit_field shift="11" size="1"/></register_field>
+      <register_field name="WPRI14" physical_register="hedeleg" size="1"><bit_field shift="14" size="1"/></register_field>
+      <register_field name="WPRI16_19" physical_register="hedeleg" size="4"><bit_field shift="16" size="4"/></register_field>
+      <register_field name="WPRI22" physical_register="hedeleg" size="1"><bit_field shift="22" size="1"/></register_field>
+      <register_field name="WPRI_FILL" physical_register="hedeleg" size="40"><bit_field shift="24" size="40"/></register_field>
+    </register>
+    <register boot="0" index="0x603" name="hideleg" size="64" type="SysReg">
+      <register_field name="IRQ1" physical_register="hideleg" size="1">
+        <bit_field shift="1" size="1"/>
+      </register_field>
+      <register_field name="IRQ5" physical_register="hideleg" size="1">
+        <bit_field shift="5" size="1"/>
+      </register_field>
+      <register_field name="IRQ9" physical_register="hideleg" size="1">
+        <bit_field shift="9" size="1"/>
+      </register_field>
+      <register_field name="IRQ13" physical_register="hideleg" size="1">
+        <bit_field shift="13" size="1"/>
+      </register_field>
+      <register_field name="WPRI_FILL_LO" physical_register="hideleg" size="14">
+        <bit_field shift="0" size="1"/><bit_field shift="2" size="3"/><bit_field shift="6" size="3"/><bit_field shift="10" size="3"/><bit_field shift="14" size="4"/>
+      </register_field>
+      <register_field name="WPRI_FILL_HI" physical_register="hideleg" size="46"><bit_field shift="18" size="46"/></register_field>
+    </register>
+    <register boot="0" index="0x604" name="hie" size="64" type="SysReg">
+      <register_field name="SEIE" physical_register="hie" size="1"><bit_field shift="9" size="1"/></register_field>
+      <register_field name="STIE" physical_register="hie" size="1"><bit_field shift="5" size="1"/></register_field>
+      <register_field name="SSIE" physical_register="hie" size="1"><bit_field shift="1" size="1"/></register_field>
+      <register_field name="WPRI_FILL" physical_register="hie" size="55">
+        <bit_field shift="0" size="1"/><bit_field shift="2" size="3"/><bit_field shift="6" size="3"/><bit_field shift="10" size="2"/><bit_field shift="12" size="46"/>
+      </register_field>
+    </register>
+    <register boot="0" index="0x605" name="htimedelta" size="64" type="SysReg">
+      <register_field name="DELTA" physical_register="htimedelta" size="64"><bit_field shift="0" size="64"/></register_field>
+    </register>
     <register boot="1" index="0x606" name="hcounteren" size="32" type="SysReg">
       <register_field name="HPM31" physical_register="hcounteren" size="1">
         <bit_field shift="31" size="1"/>
@@ -1342,13 +1589,33 @@
         <bit_field shift="0" size="64"/>
       </register_field>
     </register>
-    <register boot="0" index="0x644" name="hip" size="64" type="SysReg"/>
+    <register boot="0" index="0x644" name="hip" size="64" type="SysReg">
+      <register_field name="SEIP" physical_register="hip" size="1"><bit_field shift="9" size="1"/></register_field>
+      <register_field name="STIP" physical_register="hip" size="1"><bit_field shift="5" size="1"/></register_field>
+      <register_field name="SSIP" physical_register="hip" size="1"><bit_field shift="1" size="1"/></register_field>
+      <register_field name="WPRI_FILL" physical_register="hip" size="55">
+        <bit_field shift="0" size="1"/><bit_field shift="2" size="3"/><bit_field shift="6" size="3"/><bit_field shift="10" size="2"/><bit_field shift="12" size="46"/>
+      </register_field>
+    </register>
     <register boot="1" index="0x64a" name="htinst" size="64" type="SysReg">
       <register_field name="HTINST_VAR" physical_register="htinst" size="64">
         <bit_field shift="0" size="64"/>
       </register_field>
     </register>
-    <register boot="0" index="0x680" name="hgatp" size="64" type="SysReg"/>
+    <register boot="0" index="0x680" name="hgatp" size="64" type="SysReg">
+      <register_field name="MODE" physical_register="hgatp" size="4">
+        <bit_field shift="60" size="4"/>
+      </register_field>
+      <register_field name="RESERVED" physical_register="hgatp" size="2">
+        <bit_field shift="58" size="2"/>
+      </register_field>
+      <register_field name="VMID" physical_register="hgatp" size="14">
+        <bit_field shift="44" size="14"/>
+      </register_field>
+      <register_field name="PPN" physical_register="hgatp" size="44">
+        <bit_field shift="0" size="44"/>
+      </register_field>
+    </register>
     <register boot="0" index="0x7b0" name="dcsr" size="64" type="SysReg"/>
     <register boot="0" index="0x7b1" name="dpc" size="64" type="SysReg"/>
     <register boot="0" index="0x7b2" name="dscratch0" size="64" type="SysReg"/>
@@ -1356,6 +1623,11 @@
     <register boot="0" index="0x7c0" name="privilege" size="2" type="Internal">
       <register_field name="MODE" physical_register="privilege" size="2">
         <bit_field shift="0" size="2"/>
+      </register_field>
+    </register>
+    <register boot="0" index="0x7c1" name="virtual" size="1" type="Internal">
+      <register_field name="MODE" physical_register="virtual" size="1">
+        <bit_field shift="0" size="1"/>
       </register_field>
     </register>
     <register boot="0" index="0xb00" name="mcycle" size="64" type="SysReg"/>
@@ -1451,7 +1723,7 @@
         <bit_field shift="0" size="64"/>
       </register_field>
     </register>
-    <register boot="0" class="ReadOnlyRegister" index="0xe07" name="hgeip" size="64" type="SysReg"/>
+    <register boot="0" class="ReadOnlyRegister" index="0xe12" name="hgeip" size="64" type="SysReg"/>
     <register boot="0" class="ReadOnlyRegister" index="0xf11" name="mvendorid" size="32" type="SysReg">
       <register_field name="BANK" physical_register="mvendorid" size="25">
         <bit_field shift="7" size="25"/>

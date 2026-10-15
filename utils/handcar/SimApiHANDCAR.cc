@@ -15,8 +15,10 @@
 //
 #include "SimApiHANDCAR.h"
 
+#include <array>
 #include <cctype>
 #include <cstring>
+#include <iomanip>
 #include <iostream>
 
 #include "GenException.h"
@@ -44,6 +46,17 @@ namespace {
 
   uint32 sXlen = 64;  // Integer register width
   uint32 sFlen = 32;  // Floating-point register width
+
+  // Diagnostic events must not schedule FORCE's automatic exception handlers.
+  // Capture actual take_trap calls, including repeated identical traps.
+  struct TrapTrace {
+    uint32 cpu;
+    uint64 cause, epc, tval, tval2, tinst, target;
+    uint32 from_priv, from_virt, to_priv, to_virt;
+    string name;
+  };
+  vector<TrapTrace> sTrapTrace;
+  bool sCollectTrapTrace = false;
 
   void validate_mask(cuint64 val, cuint32 maskSize)
   {
@@ -100,10 +113,44 @@ namespace {
     return (regVal & mask);
   }
 
+  string simulator_register_name(const string& rRegName)
+  {
+    static const char* const kXprAbiNames[] = {
+      "zero", "ra", "sp", "gp", "tp", "t0", "t1", "t2",
+      "s0", "s1", "a0", "a1", "a2", "a3", "a4", "a5",
+      "a6", "a7", "s2", "s3", "s4", "s5", "s6", "s7",
+      "s8", "s9", "s10", "s11", "t3", "t4", "t5", "t6"
+    };
+
+    if ((rRegName.size() >= 2) && ((rRegName[0] == 'x') || (rRegName[0] == 'X'))) {
+      try {
+        size_t parsed_length = 0;
+        uint32 reg_index = stoul(rRegName.substr(1), &parsed_length);
+        if ((parsed_length == rRegName.size() - 1) && (reg_index < 32)) {
+          return kXprAbiNames[reg_index];
+        }
+      }
+      catch (...) {
+      }
+    }
+
+    return rRegName;
+  }
+
 }
 
 //!< simulator calls these C functions:
 extern "C" {
+
+  void handcar_trace_trap(uint32_t cpu, uint64_t cause, uint64_t epc,
+    uint64_t tval, uint64_t tval2, uint64_t tinst, uint64_t target,
+    uint32_t from_priv, uint32_t from_virt, uint32_t to_priv, uint32_t to_virt,
+    const char* name)
+  {
+    if (sCollectTrapTrace)
+      sTrapTrace.push_back({cpu, cause, epc, tval, tval2, tinst, target,
+        from_priv, from_virt, to_priv, to_virt, name ? name : "unknown"});
+  }
 
   Force::SimAPI * instantiate_api()
   {
@@ -174,7 +221,7 @@ using namespace std;
 namespace Force {
 
   SimApiHANDCAR::SimApiHANDCAR()
-    : SimAPI(), mpSimDllAPI(nullptr)
+    : SimAPI(), mpSimDllAPI(nullptr), mLastStepWasSelfLoop(false)
   {
     mpSimDllAPI = new SimDllApi();
   }
@@ -209,6 +256,7 @@ namespace Force {
 
     if(rConfig.mUseTraceFile) {
       OpenOfs(rConfig.mpTraceFile, mOfsSimTrace);
+      mOfsSimTrace << "# HANDCAR trace v2: PC(VA)=instruction address; NextPC(VA)=after step; Trap=take_trap event\n";
     }
 
     if (open_sim_dll(rSimSoFile.c_str(), mpSimDllAPI)) {
@@ -347,7 +395,8 @@ namespace Force {
     }
     else
     {
-      errorcode = mpSimDllAPI->read_simulator_register(CpuID, regname, (uint64_t *)rval, (uint64_t *)pRegMask);
+      const string sim_reg_name = simulator_register_name(regname);
+      errorcode = mpSimDllAPI->read_simulator_register(CpuID, sim_reg_name.c_str(), (uint64_t *)rval, (uint64_t *)pRegMask);
     }
 
     //std::cout << "SimApiHANDCAR::ReadRegister(...) : " << regname << " val: " << std::hex << rval << std::endl;
@@ -400,7 +449,8 @@ namespace Force {
     uint64 underscore_pos = reg_name.find("_");
     string reg_name_no_suffix = reg_name.substr(0, underscore_pos);
     if (underscore_pos == string::npos) {
-      errorcode = mpSimDllAPI->write_simulator_register(CpuID, reg_name_no_suffix.c_str(), rval, rmask);
+      const string sim_reg_name = simulator_register_name(reg_name_no_suffix);
+      errorcode = mpSimDllAPI->write_simulator_register(CpuID, sim_reg_name.c_str(), rval, rmask);
     }
     else if (reg_name[0] == 'f') {
       errorcode = mpSimDllAPI->write_simulator_register(CpuID, reg_name_no_suffix.c_str(), rval, rmask);
@@ -435,31 +485,71 @@ namespace Force {
     mExceptionUpdates.erase(mExceptionUpdates.begin(), mExceptionUpdates.end());
     mVectorElementUpdates.erase(mVectorElementUpdates.begin(), mVectorElementUpdates.end());
 
-    // get the disassembly
+    sTrapTrace.clear();
+    mLastStepWasSelfLoop = false;
+    // Decode in the pre-step translation/privilege context, including xRET/traps.
     uint64 rval = 0ull;
     uint64 rmask = 0ull;
     ReadRegister(cpuid, "PC", &rval, &rmask);
-    uint64_t orval = rval;
+    uint64_t pc_before_step = rval;
     std::string opcode;
     std::string disassembly;
-    GetDisassembly(cpuid, &orval, opcode, disassembly);
+    GetDisassembly(cpuid, &pc_before_step, opcode, disassembly);
 
-    ReadRegister(cpuid, "PC", &rval, &rmask);
-    rval = mask_register_to_size("PC", rval);
+    // The standalone Handcar library does not emit GPR callbacks. Snapshot the
+    // architectural GPRs so FORCE still receives changes produced by the step.
+    std::array<uint64, 32> gpr_values_before;
+    std::array<uint64, 32> gpr_masks;
+    for (uint32 reg_index = 0; reg_index < gpr_values_before.size(); ++reg_index) {
+      const string reg_name = "x" + to_string(reg_index);
+      ReadRegister(cpuid, reg_name.c_str(), &gpr_values_before[reg_index], &gpr_masks[reg_index]);
+    }
 
     // step the simulator; simulator returns after all updates recorded...
-    if (0 != mpSimDllAPI->step_simulator((int) cpuid, 1, 0)) {
+    sCollectTrapTrace = true;
+    int step_status = mpSimDllAPI->step_simulator((int) cpuid, 1, 0);
+    sCollectTrapTrace = false;
+    if (0 != step_status) {
       stringstream err_stream;
       err_stream << "Simulator 'step_simulator' failed.\n";
       throw SimulationError(err_stream.str());
     }
+
+    for (uint32 reg_index = 1; reg_index < gpr_values_before.size(); ++reg_index) {
+      const string reg_name = "x" + to_string(reg_index);
+      uint64 value_after = 0;
+      uint64 mask_after = 0;
+      ReadRegister(cpuid, reg_name.c_str(), &value_after, &mask_after);
+      if (value_after != gpr_values_before[reg_index]) {
+        RecordRegisterUpdate(cpuid, reg_name.c_str(), value_after, mask_after, "write");
+      }
+    }
+
+    // Keep the next PC distinct from the address of the decoded instruction.
+    ReadRegister(cpuid, "PC", &rval, &rmask);
+    rval = mask_register_to_size("PC", rval);
+    const uint64 encoding = std::stoull(opcode, nullptr, 16);
+    mLastStepWasSelfLoop = (rval == mask_address_to_size(pc_before_step)) &&
+      (encoding == 0x6f || encoding == 0xa001) && sTrapTrace.empty() && mExceptionUpdates.empty();
 
     //Bundle the vector register updates in with the regular register updates
     GetVectorRegisterUpdates(mRegisterUpdates);
 
     // print the step and updates information
     uint32 icount = UpdateCurrentInstructionCount(cpuid);
-    PrintInstructionStep(rval, cpuid, icount, opcode, disassembly);
+    PrintInstructionStep(mask_address_to_size(pc_before_step), cpuid, icount, opcode, disassembly);
+    if (mOfsSimTrace.is_open()) {
+      mOfsSimTrace << "Cpu " << dec << cpuid << " NextPC(VA) 0x"
+        << hex << setfill('0') << setw(16) << rval << "\n";
+      for (const auto& trap : sTrapTrace) {
+        mOfsSimTrace << "Cpu " << dec << trap.cpu << " Trap " << trap.name
+          << " cause=0x" << hex << trap.cause << " epc=0x" << trap.epc
+          << " tval=0x" << trap.tval << " tval2=0x" << trap.tval2
+          << " tinst=0x" << trap.tinst << " target=0x" << trap.target
+          << " from_priv=" << dec << trap.from_priv << " from_v=" << trap.from_virt
+          << " to_priv=" << trap.to_priv << " to_v=" << trap.to_virt << "\n";
+      }
+    }
     PrintRegisterUpdates();
     PrintMemoryUpdates();
     PrintMmuEvents();

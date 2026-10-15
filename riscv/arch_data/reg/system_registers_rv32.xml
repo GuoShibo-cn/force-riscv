@@ -134,6 +134,7 @@
     <physical_register index="0x7b2" name="dscratch0" size="32" type="SysReg"/>
     <physical_register index="0x7b3" name="dscratch1" size="32" type="SysReg"/>
     <physical_register class="ConfigureRegister" index="0x7c0" name="privilege" size="2" type="Internal"/>
+    <physical_register class="ConfigureRegister" index="0x7c1" name="virtual" size="1" type="Internal"/>
     <physical_register index="0xb00" name="mcycle" size="32" type="SysReg"/>
     <physical_register index="0xb02" name="minstret" size="32" type="SysReg"/>
     <physical_register index="0xb03" name="mhpmcounter3" size="32" type="SysReg"/>
@@ -1427,6 +1428,11 @@
     <register boot="0" index="0x7c0" name="privilege" size="2" type="Internal">
       <register_field name="MODE" physical_register="privilege" size="2">
         <bit_field shift="0" size="2"/>
+      </register_field>
+    </register>
+    <register boot="0" index="0x7c1" name="virtual" size="1" type="Internal">
+      <register_field name="MODE" physical_register="virtual" size="1">
+        <bit_field shift="0" size="1"/>
       </register_field>
     </register>
     <register boot="0" index="0xb00" name="mcycle" size="32" type="SysReg"/>

@@ -1,0 +1,40 @@
+{
+  "schema_version": 1,
+  "upstream": {
+    "url": "https://github.com/riscv-software-src/riscv-isa-sim.git",
+    "commit": "4ffd6ba860f4190ceac2716fa3c2cf139e85538f"
+  },
+  "patch": {
+    "path": "handcar/patches/spike-4ffd6ba-handcar.patch",
+    "sha256": "daa1fc933dec48150c00d976623077ad09bc6193dd1500ef0bf74d6f3df9689a"
+  },
+  "provenance": {
+    "kind": "official-upstream-with-local-patch",
+    "fork_remote": null,
+    "patch_export": "output/spike-rebase-4ffd6ba/revision2-build/handcar.patch"
+  },
+  "support": {
+    "hart_count": 1,
+    "hart_ids": [0],
+    "xlen": 64,
+    "host": "native Linux glibc; no cross-build or older-glibc portability claim",
+    "explicit_zicclsm": true,
+    "isa_contract": "Caller must explicitly request Zicclsm for misaligned accesses; wrapper never appends it.",
+    "wrapper_attributes": {"supported": false, "unsupported_status": 9},
+    "memory_contract": "Not a general PMA model. Host must declare/initialize RAM backing first. Architectural stores, fetches, PTE A/D updates and CBO.ZERO do not declare memory. Host RAM and declared sparse RAM are distinct from MMIO; device rejection must not create sparse backing. C++ declaration callers are responsible for selecting RAM, not devices.",
+    "asan_scope": "Optional wrapper plus ABI caller only; upstream archives are not instrumented.",
+    "remaining_limits": [
+      "Legacy packed PMP attributes are unsupported; PA-only callers pass null.",
+      "Multi-hart, general ELF loading, sparse LR/SC and vector/event/parameter stubs are not established support.",
+      "Disassembly requires caller-owned 128-byte buffers, as in FORCE/fpix.",
+      "This lock is provenance and a build contract, not a new full-regression acceptance claim."
+    ]
+  },
+  "tests": {
+    "handcar/tests/upstream_mmu_checks.cc": "058efa22ca194fe69cde6cd9b0d1de77619a2e2654d255b66bf606efdd4342e2",
+    "handcar/tests/upstream_abi_checks.cc": "3a623a82a72b09a36ff4c504e1cd6e10562f3cee836be0334dfb38306640e946"
+  },
+  "consumer_headers": {
+    "utils/handcar/SimLoader.h": "5a414bddadc0aa76e59c6d8416c72c44f1fb139218c23777fea911f7f87c6c8a"
+  }
+}

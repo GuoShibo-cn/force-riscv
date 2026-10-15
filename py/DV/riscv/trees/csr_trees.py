@@ -99,6 +99,7 @@ Hypervisor_RW_CSRs = {
     "vsstatus": 10,
     "vsie": 0,
     "vstvec": 10,
+    "vscounteren": 0,
     "vsscratch": 10,
     "vsepc": 10,
     "vscause": 10,
@@ -111,8 +112,10 @@ Hypervisor_RW_CSRs = {
     "hie": 10,
     "hcounteren": 0,
     "hgeie": 10,
+    "htimedelta": 10,
     "htval": 10,
     "hip": 10,
+    "hvip": 10,
     "htinst": 10,
     "hgatp": 10,
 }

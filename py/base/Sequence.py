@@ -551,6 +551,9 @@ class Sequence(object):
     def synchronizeWithBarrier(self, **kargs):
         return self.genThread.synchronizeWithBarrier(kargs)
 
+    def writePhysicalMemory(self, address, data, mem_bank=0):
+        return self.genThread.writePhysicalMemory(address, data, mem_bank)
+
     def _getEntryFunctionPositionalArgs(self, **kargs):
         entry_args = []
         for param in signature(self.entryFunction).parameters.values():

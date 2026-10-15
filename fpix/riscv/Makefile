@@ -16,6 +16,7 @@
 include ../Makefile.target
 
 SIM_SRCS := SimLoader.cc SimApiHANDCAR.cc
+FPIX_BIN ?= ../bin/fpix_riscv
 ALL_SRCS := $(ALL_SRCS) $(SIM_SRCS)
 
 OPTIMIZATION = -O2
@@ -32,7 +33,7 @@ vpath %.d $(DEP_DIR)
 all:
 	@$(MAKE) make_dir
 	@$(MAKE) inc/usage.h
-	@$(MAKE) ../bin/fpix_riscv
+	@$(MAKE) $(FPIX_BIN)
 
 ifeq (0, $(words $(findstring $(MAKECMDGOALS), $(NODEPS))))
 -include $(ALL_DEPS)
@@ -42,21 +43,24 @@ $(DEP_DIR)/%.d: %.cc
 	@mkdir -p $(dir $@)
 	$(CC) $(CFLAGS) $(INC_PATHS) -MM -MT '$(patsubst $(DEP_DIR)/%.d,$(OBJ_DIR)/%.o,$@)' $< -MF $@
 
+$(DEP_DIR)/load_program_options.d: inc/usage.h
+
 $(OBJ_DIR)/%.o: %.cc %.d
 	$(CC) -c $(CFLAGS) $(INC_PATHS) -o $@ $<
 
-../bin/fpix_riscv: $(ALL_OBJS)
+$(FPIX_BIN): $(ALL_OBJS)
 	$(CC) -o $@ $^ $(LFLAGS)
 
 .PHONY: make_dir
 make_dir:
-	@mkdir -p ../bin inc make_area make_area/obj make_area/dep
+	@mkdir -p $(dir $(FPIX_BIN)) inc $(OBJ_DIR) $(DEP_DIR)
 
 .PHONY: clean
 clean:
 	rm -rf make_area ../bin/fpix_riscv *.S *.ELF *.log *.railhouse inc/usage.h
 
 inc/usage.h:  README.txt ../utils/readme2usage.py
+	@mkdir -p $(dir $@)
 	cat README.txt | ../utils/readme2usage.py >inc/usage.h
 
 .PHONY: test

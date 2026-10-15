@@ -32,7 +32,7 @@ namespace Force {
   class VmasControlBlockRISCV : public VmasControlBlock
   {
   public:
-    VmasControlBlockRISCV(EPrivilegeLevelType privType, EMemBankType memType); //!< Constructor with EL type given.
+    VmasControlBlockRISCV(EPrivilegeLevelType privType, EMemBankType memType, uint32 stage = 1); //!< Constructor with EL type, memory bank, and translation stage.
     virtual ~VmasControlBlockRISCV() override { } //!< Destructor.
     ASSIGNMENT_OPERATOR_ABSENT(VmasControlBlockRISCV);
 
@@ -69,8 +69,8 @@ namespace Force {
     bool   GetWriteExecuteNever() const override; //!< Return initial write execute never flag
     EPageGranuleType GetGranuleType() const override; //!< Return address space initial page granule type.
 
-    const std::string StatusRegisterName() const { return (mRegisterPrefix + std::string("status")); } //!< returns status register name
-    const std::string AtpRegisterName() const { return "satp"; } //!< returns address translation/protection register name
+    virtual const std::string StatusRegisterName() const { return (mRegisterPrefix + std::string("status")); } //!< returns status register name
+    virtual const std::string AtpRegisterName() const { return "satp"; } //!< returns address translation/protection register name
   protected:
     std::string mRegisterPrefix; //privilege level prefix for context parameters
   };

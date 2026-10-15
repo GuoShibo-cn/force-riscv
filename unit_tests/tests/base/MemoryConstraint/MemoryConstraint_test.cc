@@ -23,6 +23,8 @@
 #include "Log.h"
 #include "Random.h"
 
+#include <memory>
+
 using text = std::string;
 using namespace Force;
 

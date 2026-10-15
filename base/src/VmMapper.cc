@@ -49,6 +49,11 @@ using namespace std;
 
 namespace Force {
 
+  VmAddressSpace* VmFactory::CreateAddressSpace(VmasControlBlock* pVmasCtlrBlock) const
+  {
+    return new VmAddressSpace(this, pVmasCtlrBlock);
+  }
+
   const AddressFilteringRegulator* VmMapper::GetAddressFilteringRegulator() const
   {
     return mpGenerator->GetAddressFilteringRegulator(); 
@@ -584,7 +589,7 @@ namespace Force {
 
   VmAddressSpace* VmPagingMapper::AddressSpaceInstance(VmasControlBlock* pVmasCtlrBlock) const
   {
-    return new VmAddressSpace(mpVmFactory, pVmasCtlrBlock);
+    return mpVmFactory->CreateAddressSpace(pVmasCtlrBlock);
   }
 
   bool VmPagingMapper::MapAddressRange(uint64 VA, uint64 size, bool isInstr, const GenPageRequest* pPageReq)

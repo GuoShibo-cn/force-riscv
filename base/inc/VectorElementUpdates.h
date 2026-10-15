@@ -16,6 +16,7 @@
 #ifndef Force_VectorElementUpdates_H
 #define Force_VectorElementUpdates_H
 
+#include <cstdint>
 #include <set>
 #include <string>
 #include <vector>

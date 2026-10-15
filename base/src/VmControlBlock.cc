@@ -31,8 +31,8 @@ using namespace std;
 
 namespace Force {
 
-  VmControlBlock::VmControlBlock(EPrivilegeLevelType privType, EMemBankType memType)
-    : VmContext(), mpGenerator(nullptr), mPrivilegeLevel(privType), mDefaultMemoryBank(memType), mBigEndian(false), mStage(1), mMaxPhysicalAddress(0)
+  VmControlBlock::VmControlBlock(EPrivilegeLevelType privType, EMemBankType memType, uint32 stage)
+    : VmContext(), mpGenerator(nullptr), mPrivilegeLevel(privType), mDefaultMemoryBank(memType), mBigEndian(false), mStage(stage), mMaxPhysicalAddress(0)
   {
   }
 

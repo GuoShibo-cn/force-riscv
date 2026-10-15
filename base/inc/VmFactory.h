@@ -55,6 +55,7 @@ namespace Force {
     virtual VmContext* CreateVmContext() const = 0; //!< Setup VmContext.
     virtual void CreatePageTableConstraints(std::vector<PageTableConstraint* >& rPageTableConstraints) const = 0; //!< Setup Page Table constraints.
     virtual VmPaMapper* VmPaMapperInstance(VmAddressSpace* pAddressSpace) const = 0; //!< Create an appropriate VmPaMapper instance.
+    virtual VmAddressSpace* CreateAddressSpace(VmasControlBlock* pVmasCtlrBlock) const; //!< Create an appropriate VmAddressSpace instance (default: plain VmAddressSpace).
     virtual EPrivilegeLevelType GetPrivilegeLevel() const = 0; //!< Return privilege level of Regime
     virtual void GetRegisterContext(std::vector<std::string>& rRegNames, bool pagingEnabled) const = 0; //!< Update rRegNames with list of context register names
     virtual void GetDelayedRegisterContext(std::vector<std::string>& rRegNames) const = 0; //!< Update rRegNames with list of delayed init context register names

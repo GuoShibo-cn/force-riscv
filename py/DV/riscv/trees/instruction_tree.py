@@ -50,10 +50,10 @@ RV_G              completed     =   RV32I + RV64I + RV32F + RV64F + RV32D +
                                     Zicsr + Zifencei
                                     (More succinctly, RV64I plus the standard
                                     extensions: I, M, A, F, D, Zicsr, Zifencei)
-Trap_Return       pending       =   {URET, SRET, MRET, WFI}
-Fence             pending       =   {SFENCE.VMA, HFENCE.BVMA, HFENCE.GVMA}
+Trap_Return       completed     =   {URET, SRET, MRET, WFI}
+Fence             completed     =   {SFENCE.VMA, HFENCE.VVMA, HFENCE.GVMA}
 
-RV_ALL_NoVector   pending       =   RV_G + RV_C + Trap_Return + Fence
+RV_ALL_NoVector   completed     =   RV_G + RV_C + Trap_Return + Fence
 RV_ALL            pending       =   ALL_RISCV_NoVector + RV_V
 
 
@@ -780,3 +780,63 @@ ALU_Int32_All_instructions = merge(
     ALU_Int32_instructions, RV32M_instructions, ALU_Int32_C_instructions
 )
 ALU_Int32_All_map = InstructionMap("ALU_Int32_All_instructions", ALU_Int32_All_instructions)
+
+# ------------------------------------------------------------------------------
+# H-extension (Hypervisor) instructions — RV64H
+# ------------------------------------------------------------------------------
+
+HLV_instructions = {
+    "HLV.B##RISCV": 10,
+    "HLV.BU##RISCV": 10,
+    "HLV.H##RISCV": 10,
+    "HLV.HU##RISCV": 10,
+    "HLV.W##RISCV": 10,
+    "HLV.WU##RISCV": 10,
+    "HLV.D##RISCV": 10,
+    "HLVX.HU##RISCV": 10,
+    "HLVX.WU##RISCV": 10,
+}
+
+HLV_map = InstructionMap("HLV_instructions", HLV_instructions)
+
+HSV_instructions = {
+    "HSV.B##RISCV": 10,
+    "HSV.H##RISCV": 10,
+    "HSV.W##RISCV": 10,
+    "HSV.D##RISCV": 10,
+}
+
+HSV_map = InstructionMap("HSV_instructions", HSV_instructions)
+
+HFENCE_instructions = {
+    "HFENCE.VVMA##RISCV": 10,
+    "HFENCE.GVMA##RISCV": 10,
+    "HINVAL.VVMA##RISCV": 10,
+    "HINVAL.GVMA##RISCV": 10,
+    "SFENCE.VMA##RISCV": 10,
+}
+
+HFENCE_map = InstructionMap("HFENCE_instructions", HFENCE_instructions)
+
+Hypervisor_instructions = merge(HLV_instructions, HSV_instructions, HFENCE_instructions)
+Hypervisor_map = InstructionMap("Hypervisor_instructions", Hypervisor_instructions)
+
+# ------------------------------------------------------------------------------
+# Trap Return instructions
+# ------------------------------------------------------------------------------
+
+Trap_Return_instructions = {
+    "MRET##RISCV": 10,
+    "SRET##RISCV": 10,
+}
+
+Trap_Return_map = InstructionMap("Trap_Return_instructions", Trap_Return_instructions)
+
+# ------------------------------------------------------------------------------
+# All instructions (no vector)
+# ------------------------------------------------------------------------------
+
+RV_ALL_NoVector_instructions = merge(
+    RV_G_instructions, RV_C_instructions, Trap_Return_instructions, Hypervisor_instructions
+)
+RV_ALL_NoVector_map = InstructionMap("RV_ALL_NoVector_instructions", RV_ALL_NoVector_instructions)

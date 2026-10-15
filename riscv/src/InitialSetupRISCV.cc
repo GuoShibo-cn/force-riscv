@@ -152,6 +152,11 @@ namespace Force {
         field_map["MODE"] = 0x8;
         break;
       case EPagingMode::Sv48:
+        field_map["MODE"] = 0x9;
+        break;
+      case EPagingMode::Sv57:
+        field_map["MODE"] = 0xa;
+        break;
       default:
         field_map["MODE"] = 0x9;
     }

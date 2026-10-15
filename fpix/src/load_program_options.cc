@@ -28,6 +28,7 @@
 #include "Random.h"
 #include "StringUtils.h"
 #include "usage.h"
+#include <cstdint>
 
 using namespace std;
 
@@ -131,8 +132,9 @@ struct Arg: public option::Arg
       for (EOptionIndexBaseType i = 0; options_strings[i] != 0; i++)
       {
         string opt_str = options_strings[i];
-        string lower_case;
-        transform(opt_str.begin(), opt_str.end(), lower_case.begin(), ::tolower);
+        string lower_case = opt_str;
+        transform(lower_case.begin(), lower_case.end(), lower_case.begin(),
+          [](unsigned char ch) { return static_cast<char>(::tolower(ch)); });
         if (lower_case.find(".elf") != string::npos)
         {
           arTestFiles.push_back(opt_str);

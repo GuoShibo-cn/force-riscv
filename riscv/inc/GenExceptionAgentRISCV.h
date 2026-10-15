@@ -53,6 +53,11 @@ namespace Force {
     bool AllowExceptionInException(const GenHandleException* except_req, std::string& rErrInfo) const override; //!< allow exception in exception
     bool NeedRecoveryAddress() const override; //!< need recovery address.
     void RecordExceptionSpecificAddressBounds(const std::map<std::string, std::string>& myMap) override; //!< record exception specific address bounds.
+    void GenerateGuestPageFaultHandler(EPagingExceptionType guestPfType); //!< Generate handler code for Guest Page Fault exceptions.
+    void HandleException(); //!< Handle exception with guest page fault support.
+    EPagingExceptionType EExceptionClassTypeToPagingExceptionType(EExceptionClassType ec_type) const; //!< Convert exception class type to paging exception type.
+    bool IsExceptionDelegatedToVS(EExceptionClassType ec_type) const; //!< Check if exception is delegated to VS-mode via hedeleg.
+    void InvalidateRegisterCache(); //!< Invalidate cached register values.
     //ExceptionContext* ExceptionContextInstance(EExceptionClassType exceptClass) const override; //!< Return an ExceptionContext object.
   private:
     //void DiagnoseUnknownReasonException(std::string& rMsgStr) const; //!< Diagnose unknown reason exception.
@@ -61,6 +66,12 @@ namespace Force {
     std::vector<uint32> mArgRegIndices; //!< handler argument regsiters
     bool mFastMode; //!< flag indicating fast mode
     std::set<uint64> mAddrTableEC; //!< Address table supported custom error codes
+    
+    // Register cache for performance optimization
+    mutable uint64 mCachedHedeleg; //!< Cached hedeleg register value
+    mutable uint64 mCachedHideleg; //!< Cached hideleg register value
+    mutable bool mHedelegCached; //!< Flag indicating if hedeleg is cached
+    mutable bool mHidelegCached; //!< Flag indicating if hideleg is cached
   };
 
 }

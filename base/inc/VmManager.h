@@ -23,6 +23,8 @@
 #include "Defines.h"
 #include "Enums.h"
 #include "Object.h"
+#include "TwoStageVmMapper.h"
+#include "PtgVmMapper.h"
 #include ARCH_ENUM_HEADER
 
 namespace Force {
@@ -46,7 +48,7 @@ namespace Force {
     const std::string ToString() const override { return Type(); } //!< Return a string describing the VmManager object.
     const char* Type() const override { return "VmManager"; }
 
-    VmManager() : Object(), mpCurrentRegime(nullptr), mpCurrentMapper(nullptr), mpGenerator(nullptr), mpVmInfo(nullptr), mVmRegimes(), mVmContextInfoCache(), mVmFactories() { } //!< Default constructor.
+    VmManager() : Object(), mpCurrentRegime(nullptr), mpCurrentMapper(nullptr), mpGenerator(nullptr), mpVmInfo(nullptr), mVmRegimes(), mVmContextInfoCache(), mpTwoStageMapper(nullptr), mpPtgDataMapper(nullptr), mPtgBindingRequired(false), mVmFactories() { } //!< Default constructor.
     ~VmManager(); //!< Destructor.
     ASSIGNMENT_OPERATOR_ABSENT(VmManager);
 
@@ -65,6 +67,17 @@ namespace Force {
     virtual VmInfo* VmInfoInstance() const { return nullptr; } //!< Return a VmInfo instance.
     void DumpPage() const; //!< dump pages on Vm regimes
     void DumpPageAndMemoryAttributesJson() const; //!< dump pages and memory attributes on Vm regimes in JSON format
+
+    // Two-stage translation support
+    bool IsTwoStageEnabled() const;
+    TwoStageVmMapper* GetTwoStageMapper() const;
+    void SetupTwoStageTranslation();
+    bool PtgBindingRequired() const { return mPtgBindingRequired; }
+    PtgVmMapper* PtgDataMapper() const { return mpPtgDataMapper.get(); }
+    void BeginPtgSwitch() { mpPtgDataMapper.reset(); mPtgBindingRequired = true; }
+    void BindPtgDataMapper(std::unique_ptr<PtgVmMapper> mapper) { mpPtgDataMapper = std::move(mapper); mPtgBindingRequired = true; }
+    void EndPtgAddressScope() { mpPtgDataMapper.reset(); mPtgBindingRequired = false; }
+    void DropPtgBinding(uint64 handle) { if (mpPtgDataMapper && mpPtgDataMapper->Handle() == handle) BeginPtgSwitch(); }
   protected:
     VmManager(const VmManager& rOther); //!< Copy constructor.
     virtual VmFactory* VmFactoryInstance(EVmRegimeType vmRegimeType) const { return nullptr; } //!< Return an VmFactory object based on the VM architecture type.
@@ -79,6 +92,9 @@ namespace Force {
     VmInfo* mpVmInfo; //!< VmInfo object used for querying.
     std::vector<VmRegime* > mVmRegimes; //!< Container for all VmRegime objects in the virtual memory system.
     std::map<uint32, const VmContextInfo* > mVmContextInfoCache; //!< Stores information to help lookup all VmContext objects.
+    TwoStageVmMapper* mpTwoStageMapper; //!< Two-stage translation mapper.
+    std::unique_ptr<PtgVmMapper> mpPtgDataMapper; //!< Borrowed PTG handle; explicit Python lifetime binding.
+    bool mPtgBindingRequired; //!< Blocks native fallback during switches/failures.
   private:
     mutable std::map<EVmRegimeType, VmFactory*> mVmFactories; //!< Container of all VmFactories.  Not to be copied.
   };

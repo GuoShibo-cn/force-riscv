@@ -86,6 +86,12 @@ namespace Force {
     SBE = 7,
     UBE = 8,
     TVM = 9,
+    VGEIN = 10,
+    VMID = 11,
+    GVA = 12,
+    VSXL = 13,
+    SPV = 14,
+    SPVP = 15,
   };
   extern unsigned char EVmContextParamTypeSize;
   extern const std::string EVmContextParamType_to_string(EVmContextParamType in_enum); //!< Get string name for enum.
@@ -129,6 +135,8 @@ namespace Force {
     X = 8,
     WR = 9,
     V = 10,
+    RSW2 = 11,
+    N = 12,
   };
   extern unsigned char EPteAttributeTypeSize;
   extern const std::string EPteAttributeType_to_string(EPteAttributeType in_enum); //!< Get string name for enum.
@@ -158,6 +166,10 @@ namespace Force {
     Sv32 = 1,
     Sv39 = 2,
     Sv48 = 3,
+    Sv39x4 = 4,
+    Sv48x4 = 5,
+    Sv57 = 6,
+    Sv57x4 = 7,
   };
   extern unsigned char EPagingModeSize;
   extern const std::string EPagingMode_to_string(EPagingMode in_enum); //!< Get string name for enum.
@@ -200,6 +212,9 @@ namespace Force {
     InstructionPageFault = 3,
     LoadPageFault = 4,
     StoreAmoPageFault = 5,
+    InstrGuestPageFault = 6,
+    LoadGuestPageFault = 7,
+    StoreAmoGuestPageFault = 8,
   };
   extern unsigned char EPagingExceptionTypeSize;
   extern const std::string EPagingExceptionType_to_string(EPagingExceptionType in_enum); //!< Get string name for enum.
@@ -297,10 +312,16 @@ namespace Force {
     StoreAmoAccessFault = 7,
     EnvCallFromUMode = 8,
     EnvCallFromSMode = 9,
-    EnvCallFromMMode = 11,
-    InstrPageFault = 12,
-    LoadPageFault = 13,
+    EnvCallFromVU = 10,
+    EnvCallFromHS = 11,
+    EnvCallFromMMode = 12,
+    InstrPageFault = 13,
+    LoadPageFault = 14,
     StoreAmoPageFault = 15,
+    InstrGuestPageFault = 16,
+    LoadGuestPageFault = 17,
+    StoreAmoGuestPageFault = 18,
+    VirtualInstruction = 19,
   };
   extern unsigned char EExceptionClassTypeSize;
   extern const std::string EExceptionClassType_to_string(EExceptionClassType in_enum); //!< Get string name for enum.

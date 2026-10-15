@@ -66,6 +66,8 @@ namespace Force {
     const Page* GetPage(uint64 VA) const override; //!< Return a pointer to the Page that covers the VA if exists.
     const Page* GetPageWithAssert(uint64 VA) const; //!< Return a pointer to the Page object that VA, fail if not exist, be there or be square.
     bool GetTranslationRange(uint64 VA, TranslationRange& rTransRange) const override; //!< Get translation range from Page that covers the VA, if exists.
+    //!< Look up the physical address for a given virtual address
+    bool LookupVirtualAddress(uint64 va, uint64& rPa, bool isInstr) const;
     uint64 MaxVirtualAddress() const override; //!< Get the max virtual address supported
     uint64 MaxPhysicalAddress() const override; //!< Get the max physical address supported
     bool InitializeRootPageTable(RootPageTable* pRootTable); //!< Initialize the VmAddressSpace object.

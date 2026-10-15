@@ -164,6 +164,9 @@ CASE( "tests for EVmContextParamType" ) {
       EXPECT(EVmContextParamType_to_string(EVmContextParamType::SBE) == "SBE");
       EXPECT(EVmContextParamType_to_string(EVmContextParamType::UBE) == "UBE");
       EXPECT(EVmContextParamType_to_string(EVmContextParamType::TVM) == "TVM");
+      EXPECT(EVmContextParamType_to_string(EVmContextParamType::VGEIN) == "VGEIN");
+      EXPECT(EVmContextParamType_to_string(EVmContextParamType::VMID) == "VMID");
+      EXPECT(EVmContextParamType_to_string(EVmContextParamType::GVA) == "GVA");
     }
 
     SECTION( "test string to enum conversion" ) {
@@ -177,6 +180,9 @@ CASE( "tests for EVmContextParamType" ) {
       EXPECT(string_to_EVmContextParamType("SBE") == EVmContextParamType::SBE);
       EXPECT(string_to_EVmContextParamType("UBE") == EVmContextParamType::UBE);
       EXPECT(string_to_EVmContextParamType("TVM") == EVmContextParamType::TVM);
+      EXPECT(string_to_EVmContextParamType("VGEIN") == EVmContextParamType::VGEIN);
+      EXPECT(string_to_EVmContextParamType("VMID") == EVmContextParamType::VMID);
+      EXPECT(string_to_EVmContextParamType("GVA") == EVmContextParamType::GVA);
     }
 
     SECTION( "test string to enum conversion with non-matching string" ) {
@@ -204,6 +210,12 @@ CASE( "tests for EVmContextParamType" ) {
       EXPECT(try_string_to_EVmContextParamType("UBE", okay) == EVmContextParamType::UBE);
       EXPECT(okay);
       EXPECT(try_string_to_EVmContextParamType("TVM", okay) == EVmContextParamType::TVM);
+      EXPECT(okay);
+      EXPECT(try_string_to_EVmContextParamType("VGEIN", okay) == EVmContextParamType::VGEIN);
+      EXPECT(okay);
+      EXPECT(try_string_to_EVmContextParamType("VMID", okay) == EVmContextParamType::VMID);
+      EXPECT(okay);
+      EXPECT(try_string_to_EVmContextParamType("GVA", okay) == EVmContextParamType::GVA);
       EXPECT(okay);
     }
 
@@ -291,6 +303,8 @@ CASE( "tests for EPteAttributeType" ) {
       EXPECT(EPteAttributeType_to_string(EPteAttributeType::X) == "X");
       EXPECT(EPteAttributeType_to_string(EPteAttributeType::WR) == "WR");
       EXPECT(EPteAttributeType_to_string(EPteAttributeType::V) == "V");
+      EXPECT(EPteAttributeType_to_string(EPteAttributeType::RSW2) == "RSW2");
+      EXPECT(EPteAttributeType_to_string(EPteAttributeType::N) == "N");
     }
 
     SECTION( "test string to enum conversion" ) {
@@ -305,6 +319,8 @@ CASE( "tests for EPteAttributeType" ) {
       EXPECT(string_to_EPteAttributeType("X") == EPteAttributeType::X);
       EXPECT(string_to_EPteAttributeType("WR") == EPteAttributeType::WR);
       EXPECT(string_to_EPteAttributeType("V") == EPteAttributeType::V);
+      EXPECT(string_to_EPteAttributeType("RSW2") == EPteAttributeType::RSW2);
+      EXPECT(string_to_EPteAttributeType("N") == EPteAttributeType::N);
     }
 
     SECTION( "test string to enum conversion with non-matching string" ) {
@@ -334,6 +350,10 @@ CASE( "tests for EPteAttributeType" ) {
       EXPECT(try_string_to_EPteAttributeType("WR", okay) == EPteAttributeType::WR);
       EXPECT(okay);
       EXPECT(try_string_to_EPteAttributeType("V", okay) == EPteAttributeType::V);
+      EXPECT(okay);
+      EXPECT(try_string_to_EPteAttributeType("RSW2", okay) == EPteAttributeType::RSW2);
+      EXPECT(okay);
+      EXPECT(try_string_to_EPteAttributeType("N", okay) == EPteAttributeType::N);
       EXPECT(okay);
     }
 
@@ -386,6 +406,8 @@ CASE( "tests for EPagingMode" ) {
       EXPECT(EPagingMode_to_string(EPagingMode::Sv32) == "Sv32");
       EXPECT(EPagingMode_to_string(EPagingMode::Sv39) == "Sv39");
       EXPECT(EPagingMode_to_string(EPagingMode::Sv48) == "Sv48");
+      EXPECT(EPagingMode_to_string(EPagingMode::Sv39x4) == "Sv39x4");
+      EXPECT(EPagingMode_to_string(EPagingMode::Sv48x4) == "Sv48x4");
     }
 
     SECTION( "test string to enum conversion" ) {
@@ -393,6 +415,8 @@ CASE( "tests for EPagingMode" ) {
       EXPECT(string_to_EPagingMode("Sv32") == EPagingMode::Sv32);
       EXPECT(string_to_EPagingMode("Sv39") == EPagingMode::Sv39);
       EXPECT(string_to_EPagingMode("Sv48") == EPagingMode::Sv48);
+      EXPECT(string_to_EPagingMode("Sv39x4") == EPagingMode::Sv39x4);
+      EXPECT(string_to_EPagingMode("Sv48x4") == EPagingMode::Sv48x4);
     }
 
     SECTION( "test string to enum conversion with non-matching string" ) {
@@ -408,6 +432,10 @@ CASE( "tests for EPagingMode" ) {
       EXPECT(try_string_to_EPagingMode("Sv39", okay) == EPagingMode::Sv39);
       EXPECT(okay);
       EXPECT(try_string_to_EPagingMode("Sv48", okay) == EPagingMode::Sv48);
+      EXPECT(okay);
+      EXPECT(try_string_to_EPagingMode("Sv39x4", okay) == EPagingMode::Sv39x4);
+      EXPECT(okay);
+      EXPECT(try_string_to_EPagingMode("Sv48x4", okay) == EPagingMode::Sv48x4);
       EXPECT(okay);
     }
 
@@ -506,6 +534,9 @@ CASE( "tests for EPagingExceptionType" ) {
       EXPECT(EPagingExceptionType_to_string(EPagingExceptionType::InstructionPageFault) == "InstructionPageFault");
       EXPECT(EPagingExceptionType_to_string(EPagingExceptionType::LoadPageFault) == "LoadPageFault");
       EXPECT(EPagingExceptionType_to_string(EPagingExceptionType::StoreAmoPageFault) == "StoreAmoPageFault");
+      EXPECT(EPagingExceptionType_to_string(EPagingExceptionType::InstrGuestPageFault) == "InstrGuestPageFault");
+      EXPECT(EPagingExceptionType_to_string(EPagingExceptionType::LoadGuestPageFault) == "LoadGuestPageFault");
+      EXPECT(EPagingExceptionType_to_string(EPagingExceptionType::StoreAmoGuestPageFault) == "StoreAmoGuestPageFault");
     }
 
     SECTION( "test string to enum conversion" ) {
@@ -515,6 +546,9 @@ CASE( "tests for EPagingExceptionType" ) {
       EXPECT(string_to_EPagingExceptionType("InstructionPageFault") == EPagingExceptionType::InstructionPageFault);
       EXPECT(string_to_EPagingExceptionType("LoadPageFault") == EPagingExceptionType::LoadPageFault);
       EXPECT(string_to_EPagingExceptionType("StoreAmoPageFault") == EPagingExceptionType::StoreAmoPageFault);
+      EXPECT(string_to_EPagingExceptionType("InstrGuestPageFault") == EPagingExceptionType::InstrGuestPageFault);
+      EXPECT(string_to_EPagingExceptionType("LoadGuestPageFault") == EPagingExceptionType::LoadGuestPageFault);
+      EXPECT(string_to_EPagingExceptionType("StoreAmoGuestPageFault") == EPagingExceptionType::StoreAmoGuestPageFault);
     }
 
     SECTION( "test string to enum conversion with non-matching string" ) {
@@ -534,6 +568,12 @@ CASE( "tests for EPagingExceptionType" ) {
       EXPECT(try_string_to_EPagingExceptionType("LoadPageFault", okay) == EPagingExceptionType::LoadPageFault);
       EXPECT(okay);
       EXPECT(try_string_to_EPagingExceptionType("StoreAmoPageFault", okay) == EPagingExceptionType::StoreAmoPageFault);
+      EXPECT(okay);
+      EXPECT(try_string_to_EPagingExceptionType("InstrGuestPageFault", okay) == EPagingExceptionType::InstrGuestPageFault);
+      EXPECT(okay);
+      EXPECT(try_string_to_EPagingExceptionType("LoadGuestPageFault", okay) == EPagingExceptionType::LoadGuestPageFault);
+      EXPECT(okay);
+      EXPECT(try_string_to_EPagingExceptionType("StoreAmoGuestPageFault", okay) == EPagingExceptionType::StoreAmoGuestPageFault);
       EXPECT(okay);
     }
 
@@ -777,10 +817,16 @@ CASE( "tests for EExceptionClassType" ) {
       EXPECT(EExceptionClassType_to_string(EExceptionClassType::StoreAmoAccessFault) == "StoreAmoAccessFault");
       EXPECT(EExceptionClassType_to_string(EExceptionClassType::EnvCallFromUMode) == "EnvCallFromUMode");
       EXPECT(EExceptionClassType_to_string(EExceptionClassType::EnvCallFromSMode) == "EnvCallFromSMode");
+      EXPECT(EExceptionClassType_to_string(EExceptionClassType::EnvCallFromVU) == "EnvCallFromVU");
+      EXPECT(EExceptionClassType_to_string(EExceptionClassType::EnvCallFromHS) == "EnvCallFromHS");
       EXPECT(EExceptionClassType_to_string(EExceptionClassType::EnvCallFromMMode) == "EnvCallFromMMode");
       EXPECT(EExceptionClassType_to_string(EExceptionClassType::InstrPageFault) == "InstrPageFault");
       EXPECT(EExceptionClassType_to_string(EExceptionClassType::LoadPageFault) == "LoadPageFault");
       EXPECT(EExceptionClassType_to_string(EExceptionClassType::StoreAmoPageFault) == "StoreAmoPageFault");
+      EXPECT(EExceptionClassType_to_string(EExceptionClassType::InstrGuestPageFault) == "InstrGuestPageFault");
+      EXPECT(EExceptionClassType_to_string(EExceptionClassType::LoadGuestPageFault) == "LoadGuestPageFault");
+      EXPECT(EExceptionClassType_to_string(EExceptionClassType::StoreAmoGuestPageFault) == "StoreAmoGuestPageFault");
+      EXPECT(EExceptionClassType_to_string(EExceptionClassType::VirtualInstruction) == "VirtualInstruction");
     }
 
     SECTION( "test string to enum conversion" ) {
@@ -794,10 +840,16 @@ CASE( "tests for EExceptionClassType" ) {
       EXPECT(string_to_EExceptionClassType("StoreAmoAccessFault") == EExceptionClassType::StoreAmoAccessFault);
       EXPECT(string_to_EExceptionClassType("EnvCallFromUMode") == EExceptionClassType::EnvCallFromUMode);
       EXPECT(string_to_EExceptionClassType("EnvCallFromSMode") == EExceptionClassType::EnvCallFromSMode);
+      EXPECT(string_to_EExceptionClassType("EnvCallFromVU") == EExceptionClassType::EnvCallFromVU);
+      EXPECT(string_to_EExceptionClassType("EnvCallFromHS") == EExceptionClassType::EnvCallFromHS);
       EXPECT(string_to_EExceptionClassType("EnvCallFromMMode") == EExceptionClassType::EnvCallFromMMode);
       EXPECT(string_to_EExceptionClassType("InstrPageFault") == EExceptionClassType::InstrPageFault);
       EXPECT(string_to_EExceptionClassType("LoadPageFault") == EExceptionClassType::LoadPageFault);
       EXPECT(string_to_EExceptionClassType("StoreAmoPageFault") == EExceptionClassType::StoreAmoPageFault);
+      EXPECT(string_to_EExceptionClassType("InstrGuestPageFault") == EExceptionClassType::InstrGuestPageFault);
+      EXPECT(string_to_EExceptionClassType("LoadGuestPageFault") == EExceptionClassType::LoadGuestPageFault);
+      EXPECT(string_to_EExceptionClassType("StoreAmoGuestPageFault") == EExceptionClassType::StoreAmoGuestPageFault);
+      EXPECT(string_to_EExceptionClassType("VirtualInstruction") == EExceptionClassType::VirtualInstruction);
     }
 
     SECTION( "test string to enum conversion with non-matching string" ) {
@@ -826,6 +878,10 @@ CASE( "tests for EExceptionClassType" ) {
       EXPECT(okay);
       EXPECT(try_string_to_EExceptionClassType("EnvCallFromSMode", okay) == EExceptionClassType::EnvCallFromSMode);
       EXPECT(okay);
+      EXPECT(try_string_to_EExceptionClassType("EnvCallFromVU", okay) == EExceptionClassType::EnvCallFromVU);
+      EXPECT(okay);
+      EXPECT(try_string_to_EExceptionClassType("EnvCallFromHS", okay) == EExceptionClassType::EnvCallFromHS);
+      EXPECT(okay);
       EXPECT(try_string_to_EExceptionClassType("EnvCallFromMMode", okay) == EExceptionClassType::EnvCallFromMMode);
       EXPECT(okay);
       EXPECT(try_string_to_EExceptionClassType("InstrPageFault", okay) == EExceptionClassType::InstrPageFault);
@@ -833,6 +889,14 @@ CASE( "tests for EExceptionClassType" ) {
       EXPECT(try_string_to_EExceptionClassType("LoadPageFault", okay) == EExceptionClassType::LoadPageFault);
       EXPECT(okay);
       EXPECT(try_string_to_EExceptionClassType("StoreAmoPageFault", okay) == EExceptionClassType::StoreAmoPageFault);
+      EXPECT(okay);
+      EXPECT(try_string_to_EExceptionClassType("InstrGuestPageFault", okay) == EExceptionClassType::InstrGuestPageFault);
+      EXPECT(okay);
+      EXPECT(try_string_to_EExceptionClassType("LoadGuestPageFault", okay) == EExceptionClassType::LoadGuestPageFault);
+      EXPECT(okay);
+      EXPECT(try_string_to_EExceptionClassType("StoreAmoGuestPageFault", okay) == EExceptionClassType::StoreAmoGuestPageFault);
+      EXPECT(okay);
+      EXPECT(try_string_to_EExceptionClassType("VirtualInstruction", okay) == EExceptionClassType::VirtualInstruction);
       EXPECT(okay);
     }
 

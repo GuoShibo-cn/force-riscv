@@ -28,7 +28,7 @@ namespace Force {
   */
   class VmDirectMapControlBlock : public VmControlBlock {
   public:
-    VmDirectMapControlBlock(EPrivilegeLevelType elType, EMemBankType memType); //!< Constructor with EL type and memory bank given.
+    VmDirectMapControlBlock(EPrivilegeLevelType privType, EMemBankType memType, uint32 stage = 1); //!< Constructor with EL type, memory bank, and translation stage.
     ~VmDirectMapControlBlock() override = default; //!< Destructor.
     VmDirectMapControlBlock& operator=(const VmDirectMapControlBlock& rOther) = delete; //!< Copy assignment operator not currently needed.
 

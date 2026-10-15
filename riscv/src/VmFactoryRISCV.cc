@@ -22,10 +22,14 @@
 #include "PageTableConstraint.h"
 #include "UtilityFunctions.h"
 #include "VmDirectMapControlBlockRISCV.h"
+#include "VmGpaAddressSpace.h"
+#include "VmAddressSpaceRISCV.h"
 #include "VmInfoRISCV.h"
 #include "VmMapper.h"
 #include "VmPaMapper.h"
 #include "VmasControlBlockRISCV.h"
+#include "VmasControlBlockVS.h"
+#include "VmasControlBlockHS.h"
 
 using namespace std;
 
@@ -61,11 +65,13 @@ namespace Force {
     switch (mVmRegimeType)
     {
       case EVmRegimeType::M:
-        return new VmDirectMapControlBlockRISCV(EPrivilegeLevelType::M, memBankType);
+        return new VmDirectMapControlBlockRISCV(EPrivilegeLevelType::M, memBankType, 1);
       case EVmRegimeType::S:
+        return new VmDirectMapControlBlockRISCV(EPrivilegeLevelType::S, memBankType, 1);
       case EVmRegimeType::HS:
+        return new VmDirectMapControlBlockRISCV(EPrivilegeLevelType::S, memBankType, 2);  // G-stage
       case EVmRegimeType::VS:
-        return new VmDirectMapControlBlockRISCV(EPrivilegeLevelType::S, memBankType);
+        return new VmDirectMapControlBlockRISCV(EPrivilegeLevelType::S, memBankType, 1);  // VS-stage
       default:
         LOG(fail) << "{VmFactoryRISCV::CreateVmDirectMapControlBlock} Unsupported EVmRegimeType enum value: " << EVmRegimeType_to_string(mVmRegimeType) << endl;
         FAIL("invalid_regime_type_vm_dmcb");
@@ -79,11 +85,13 @@ namespace Force {
     switch (mVmRegimeType)
     {
       case EVmRegimeType::M:
-        return new VmasControlBlockRISCV(EPrivilegeLevelType::M, memBankType);
+        return new VmasControlBlockRISCV(EPrivilegeLevelType::M, memBankType, 1);
       case EVmRegimeType::S:
+        return new VmasControlBlockRISCV(EPrivilegeLevelType::S, memBankType, 1);
       case EVmRegimeType::HS:
+        return new VmasControlBlockHS(EPrivilegeLevelType::H, memBankType, 2);  // G-stage
       case EVmRegimeType::VS:
-        return new VmasControlBlockRISCV(EPrivilegeLevelType::S, memBankType);
+        return new VmasControlBlockVS(EPrivilegeLevelType::S, memBankType, 1);  // VS-stage
       default:
         LOG(fail) << "{VmFactoryRISCV::CreateVmasControlBlock} Unsupported EVmRegimeType enum value: " << EVmRegimeType_to_string(mVmRegimeType) << endl;
         FAIL("invalid_regime_type_vmas_cb");
@@ -99,9 +107,8 @@ namespace Force {
 
   PteAttribute* VmFactoryRISCV::PteAttributeInstance(EPteAttributeType attrType) const
   {
-    LOG(fail) << "{VmFactoryRISCV::PteAttributeInstance} not yet implemented." << endl;
-    FAIL("not-yet-implemented");
-
+    LOG(warn) << "{VmFactoryRISCV::PteAttributeInstance} not yet implemented for attrType="
+              << EPteAttributeType_to_string(attrType) << ". Returning nullptr (graceful degradation)." << endl;
     return nullptr;
   }
 
@@ -147,11 +154,18 @@ namespace Force {
         if (pagingEnabled) rRegNames.push_back("satp");
         break;
       case EVmRegimeType::HS:
+        rRegNames.push_back("hstatus");
+        if (pagingEnabled) rRegNames.push_back("hgatp");
+        rRegNames.push_back("hideleg");
+        rRegNames.push_back("hedeleg");
         break;
-        //hgatp, hstatus
       case EVmRegimeType::VS:
+        rRegNames.push_back("vsstatus");
+        if (pagingEnabled) rRegNames.push_back("vsatp");
+        rRegNames.push_back("vstvec");
+        rRegNames.push_back("vsie");
+        rRegNames.push_back("vstval");
         break;
-        //vsstatus, vsatp
       default:
         LOG(fail) << "{VmFactoryRISCV::GetRegisterContext} Unsupported EVmRegimeType enum value: " << EVmRegimeType_to_string(mVmRegimeType) << endl;
         FAIL("invalid_regime_type_get_reg_context");
@@ -172,9 +186,7 @@ namespace Force {
 
   VmContext* VmFactoryRISCV::CreateVmContext() const
   {
-    LOG(fail) << "{VmFactoryRISCV::CreateVmContext} not yet implemented." << endl;
-    FAIL("not-yet-implemented");
-
+    LOG(warn) << "{VmFactoryRISCV::CreateVmContext} not yet implemented. Returning nullptr (graceful degradation)." << endl;
     return nullptr;
   }
 
@@ -190,6 +202,17 @@ namespace Force {
   VmPaMapper* VmFactoryRISCV::VmPaMapperInstance(VmAddressSpace* pAddressSpace) const
   {
     return new VmPaMapper(pAddressSpace);
+  }
+
+  VmAddressSpace* VmFactoryRISCV::CreateAddressSpace(VmasControlBlock* pVmasCtlrBlock) const
+  {
+    if (mVmRegimeType == EVmRegimeType::HS)
+    {
+      LOG(info) << "{VmFactoryRISCV::CreateAddressSpace} creating VmGpaAddressSpace for HS regime" << endl;
+      return new VmGpaAddressSpace(this, pVmasCtlrBlock);
+    }
+    LOG(info) << "{VmFactoryRISCV::CreateAddressSpace} creating VmAddressSpaceRISCV for regime " << EVmRegimeType_to_string(mVmRegimeType) << endl;
+    return new VmAddressSpaceRISCV(this, pVmasCtlrBlock);
   }
 
 }

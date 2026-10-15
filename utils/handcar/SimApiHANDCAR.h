@@ -63,6 +63,7 @@ namespace Force {
     void EnterSpeculativeMode(uint32 cpuId) override; //!< The CPU thread enters speculative mode.
     void LeaveSpeculativeMode(uint32 cpuId) override; //!< The CPU thread leaves speculative mode.
     void RecordExceptionUpdate(const SimException *pException) override; //!< Record exception update.
+    bool LastStepWasSelfLoop() const { return mLastStepWasSelfLoop; } //!< A decoded terminal branch, without a trap.
 
     ASSIGNMENT_OPERATOR_ABSENT(SimApiHANDCAR);
     COPY_CONSTRUCTOR_ABSENT(SimApiHANDCAR);
@@ -70,6 +71,7 @@ namespace Force {
     std::string BuildHandcarConfigurationString(const ApiSimConfig& rConfig);
   private:
     SimDllApi * mpSimDllAPI;       //!< Simulator shared object APIs.
+    bool mLastStepWasSelfLoop;
   };
 }
 

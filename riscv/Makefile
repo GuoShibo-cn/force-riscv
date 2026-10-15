@@ -14,6 +14,7 @@
 # limitations under the License.
 #
 ARCH_SRCS := $(notdir $(wildcard src/*.cc))
+FRISCV_BIN ?= ../bin/friscv
 THIRD_PARTY_SRCS := $(notdir $(wildcard ../3rd_party/src/*.cc))
 BASE_SRCS := $(notdir $(wildcard ../base/src/*.cc))
 EXC_LIB_SRCS := ../utils/handcar/UopInterface.cc
@@ -34,7 +35,7 @@ vpath %.d $(DEP_DIR)
 
 all:
 	@$(MAKE) make_dir
-	@$(MAKE) ../bin/friscv
+	@$(MAKE) $(FRISCV_BIN)
 	@cd ../utils/handcar; $(MAKE)
 
 ifeq (0, $(words $(findstring $(MAKECMDGOALS), $(NODEPS))))
@@ -48,7 +49,7 @@ $(DEP_DIR)/%.d: %.cc
 $(OBJ_DIR)/%.o: %.cc %.d
 	$(CC) -c $(CFLAGS) $(INC_PATHS) -o $@ $<
 
-../bin/friscv: $(ALL_OBJS)
+$(FRISCV_BIN): $(ALL_OBJS)
 	$(CC) -o $@ $^ $(LFLAGS) 
 
 .PHONY: make_dir

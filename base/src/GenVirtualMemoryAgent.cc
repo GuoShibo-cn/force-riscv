@@ -14,6 +14,7 @@
 // limitations under the License.
 //
 #include "GenVirtualMemoryAgent.h"
+#include <stdexcept>
 
 #include <memory>
 
@@ -54,6 +55,10 @@ namespace Force {
   void  GenVirtualMemoryAgent::HandleRequest()
   {
     EVmRequestType req_type = mpVirtualMemoryRequest->VmRequestType();
+    if (mpGenerator->GetVmManager()->PtgBindingRequired() &&
+        (req_type == EVmRequestType::GenVMVA || req_type == EVmRequestType::GenVmContext ||
+         req_type == EVmRequestType::GenFreePage))
+      throw std::runtime_error("unsupported native VM request in PTG address scope");
     // << "EVmRequestType: " << EVmRequestType_to_string(req_type) << endl;
     switch (req_type) {
     case EVmRequestType::GenPA:
@@ -125,6 +130,13 @@ namespace Force {
   {
     uint64 ret_va = 0;
     auto va_req = dynamic_cast<GenVaRequest* > (mpVirtualMemoryRequest);
+    auto manager = mpGenerator->GetVmManager();
+    if (manager->PtgBindingRequired()) {
+      auto mapper = manager->PtgDataMapper();
+      if (!mapper) throw std::runtime_error("PTG address scope has no valid binding");
+      va_req->mVA = mapper->GenerateAddress(*va_req, false);
+      return;
+    }
     bool is_instr = (va_req->DataType() == EMemDataType::Instruction);
     if (is_instr and va_req->SharedMemory())
     {
@@ -249,6 +261,13 @@ namespace Force {
   void GenVirtualMemoryAgent::GenVAforPA()
   {
     auto vapa_req = dynamic_cast<GenVaForPaRequest* > (mpVirtualMemoryRequest);
+    auto manager = mpGenerator->GetVmManager();
+    if (manager->PtgBindingRequired()) {
+      auto mapper = manager->PtgDataMapper();
+      if (!mapper) throw std::runtime_error("PTG address scope has no valid binding");
+      vapa_req->mVA = mapper->GenerateAddress(*vapa_req, true);
+      return;
+    }
     uint64 ret_va = 0;
     bool is_instr = (vapa_req->DataType() == EMemDataType::Instruction);
 
